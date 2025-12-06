@@ -1514,7 +1514,7 @@
         const themeIcon = themeToggle.querySelector('i');
         
         // 检查本地存储中的主题偏好
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'dark';
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-mode');
             themeIcon.classList.remove('fa-moon');

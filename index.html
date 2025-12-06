@@ -17,7 +17,7 @@
             --accent-color: #7ed321;
             --shadow: rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
-            --background-image: none;
+            --background-image: url('./images/star.avif');
             --background-overlay: rgba(255, 255, 255, 0.85);
             --nav-height: 4rem;
             --container-padding: 5vw;
@@ -33,7 +33,7 @@
             --card-bg: #1e1e1e;
             --accent-color: #81c784;
             --shadow: rgba(0, 0, 0, 0.3);
-            --background-image: none;
+            --background-image: url('./images/star.avif');
             --background-overlay: rgba(0, 0, 0, 0.7);
         }
         
@@ -272,39 +272,8 @@
             font-size: 1.2rem;
         }
         
-        .background-input-group {
-            display: flex;
-            margin-bottom: 1rem;
-        }
-        
-        .background-input-group input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.2);
-            border-radius: var(--border-radius) 0 0 var(--border-radius);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            outline: none;
-            font-size: 0.95rem;
-        }
-        
-        .background-input-group button {
-            padding: 0.75rem 1.25rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0 var(--border-radius) var(--border-radius) 0;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-        }
-        
-        .background-input-group button:hover {
-            background-color: #3a80d2;
-        }
-        
         .background-options {
-            margin-top: 1.25rem;
+            margin-top: 0.25rem;
         }
         
         .background-option {
@@ -348,15 +317,15 @@
         }
         
         .background-option:nth-child(2) .background-preview {
-            background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1925&q=80');
+            background-image: url('./images/mountain.avif');
         }
         
         .background-option:nth-child(3) .background-preview {
-            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-image: url('./images/star.avif');
         }
         
         .background-option:nth-child(4) .background-preview {
-            background-image: url('https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-image: url('./images/flowers.avif');
         }
         
         /* 页面样式 */
@@ -1020,7 +989,7 @@
                     <span>关于我</span>
                 </a></li>
                 <li><a href="#" data-page="experience">
-                    <i class="fas fa-briefcase"></i>
+                    <i class="fas fa-pencil-alt"></i>
                     <span>随笔</span>
                 </a></li>
                 <li><a href="#" data-page="skills">
@@ -1046,14 +1015,10 @@
 
     <!-- 背景设置面板 -->
     <div class="background-panel" id="backgroundPanel">
-        <h3>自定义背景</h3>
-        <div class="background-input-group">
-            <input type="text" id="backgroundInput" placeholder="输入背景图片URL或路径">
-            <button id="applyBackground">应用</button>
-        </div>
+        <h3>选择背景</h3>
         
         <div class="background-options">
-            <div class="background-option active" data-bg="none">
+            <div class="background-option" data-bg="none">
                 <div class="background-preview">
                     <i class="fas fa-ban"></i>
                 </div>
@@ -1071,7 +1036,7 @@
                 </div>
             </div>
             
-            <div class="background-option" data-bg="./images/star.avif">
+            <div class="background-option active" data-bg="./images/star.avif">
                 <div class="background-preview"></div>
                 <div>
                     <h4>星空</h4>
@@ -1538,43 +1503,24 @@
         // 背景设置功能
         const backgroundToggle = document.getElementById('backgroundToggle');
         const backgroundPanel = document.getElementById('backgroundPanel');
-        const backgroundInput = document.getElementById('backgroundInput');
-        const applyBackgroundBtn = document.getElementById('applyBackground');
         const backgroundOptions = document.querySelectorAll('.background-option');
         const backgroundLayer = document.querySelector('.background-layer');
         
         // 检查本地存储中的背景偏好
-        const savedBackground = localStorage.getItem('background') || '';
-        if (savedBackground) {
-            backgroundLayer.style.backgroundImage = `url('${savedBackground}')`;
-            backgroundInput.value = savedBackground;
-        }
+        const savedBackground = localStorage.getItem('background') || './images/star.avif';
+        // 设置默认背景为星空
+        backgroundLayer.style.backgroundImage = `url('${savedBackground}')`;
+        
+        // 设置对应的选项为激活状态
+        backgroundOptions.forEach(option => {
+            if (option.dataset.bg === savedBackground) {
+                option.classList.add('active');
+            }
+        });
         
         // 切换背景面板显示/隐藏
         backgroundToggle.addEventListener('click', () => {
             backgroundPanel.classList.toggle('active');
-        });
-        
-        // 应用自定义背景
-        applyBackgroundBtn.addEventListener('click', () => {
-            const bgUrl = backgroundInput.value.trim();
-            if (bgUrl) {
-                // 更新背景
-                backgroundLayer.style.backgroundImage = `url('${bgUrl}')`;
-                
-                // 保存到本地存储
-                localStorage.setItem('background', bgUrl);
-                
-                // 移除所有激活状态
-                backgroundOptions.forEach(opt => {
-                    opt.classList.remove('active');
-                });
-                
-                // 隐藏面板
-                backgroundPanel.classList.remove('active');
-            } else {
-                alert('请输入有效的图片URL');
-            }
         });
         
         // 点击预设背景选项
@@ -1593,11 +1539,9 @@
                 // 更新背景
                 if (bgClass === 'none') {
                     backgroundLayer.style.backgroundImage = 'none';
-                    backgroundInput.value = '';
-                    localStorage.setItem('background', '');
+                    localStorage.setItem('background', 'none');
                 } else {
                     backgroundLayer.style.backgroundImage = `url('${bgClass}')`;
-                    backgroundInput.value = bgClass;
                     localStorage.setItem('background', bgClass);
                 }
                 

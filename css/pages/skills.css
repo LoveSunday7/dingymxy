@@ -1,0 +1,76 @@
+/* 技能与项目样式 */
+.skills-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+}
+
+.skill-item {
+    background-color: var(--card-bg);
+    padding: 1.25rem;
+    border-radius: 0.625rem;
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+}
+
+.skill-bar {
+    height: 0.625rem;
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    border-radius: 0.3125rem;
+    margin-top: 0.625rem;
+    overflow: hidden;
+}
+
+.skill-level {
+    height: 100%;
+    background-color: var(--accent-color);
+    border-radius: 0.3125rem;
+}
+
+.projects-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 1.5rem;
+    margin-top: 1.875rem;
+}
+
+.project-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+    transition: var(--transition);
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+}
+
+.project-card:hover {
+    transform: translateY(-0.625rem);
+    box-shadow: 0 0.9375rem 1.875rem var(--shadow);
+}
+
+.project-img {
+    width: 100%;
+    height: 11.25rem;
+    object-fit: cover;
+}
+
+.project-content {
+    padding: 1.25rem;
+}
+
+.project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.9375rem;
+}
+
+.project-tag {
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    color: var(--primary-color);
+    padding: 0.3125rem 0.625rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}

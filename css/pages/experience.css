@@ -1,0 +1,83 @@
+/* 经历页面样式 */
+.timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    width: 0.25rem;
+    background-color: var(--primary-color);
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.timeline-item {
+    padding: 1.25rem 2.5rem;
+    position: relative;
+    width: 50%;
+    margin-bottom: 2.5rem;
+}
+
+.timeline-item:nth-child(odd) {
+    left: 0;
+}
+
+.timeline-item:nth-child(even) {
+    left: 50%;
+}
+
+.timeline-content {
+    background-color: var(--card-bg);
+    padding: 1.25rem;
+    border-radius: 0.625rem;
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+}
+
+.timeline-date {
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 0.625rem;
+    font-size: 0.95rem;
+}
+
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    top: 1.5625rem;
+    right: -0.625rem;
+    z-index: 1;
+    border: 0.1875rem solid var(--card-bg);
+}
+
+.timeline-item:nth-child(even)::after {
+    left: -0.625rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 1.9375rem;
+    }
+    
+    .timeline-item {
+        width: 100%;
+        padding-left: 4.375rem;
+        padding-right: 1.25rem;
+        left: 0 !important;
+    }
+    
+    .timeline-item::after {
+        left: 1.3125rem !important;
+        right: auto;
+    }
+}

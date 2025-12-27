@@ -1,0 +1,46 @@
+/* 联系我页面样式 */
+.contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9375rem;
+    padding: 1rem 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 0.625rem;
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+    transition: var(--transition);
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    flex-grow: 1;
+    max-width: 18rem;
+    cursor: pointer;
+}
+
+.contact-item:hover {
+    transform: translateY(-0.3125rem);
+    box-shadow: 0 0.5rem 1.25rem var(--shadow);
+}
+
+.contact-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .contact-info {
+        gap: 0.75rem;
+    }
+    
+    .contact-item {
+        width: 100%;
+        justify-content: flex-start;
+        max-width: 100%;
+    }
+}

@@ -76,13 +76,11 @@
                 console.log('开始加载模块...');
 
                 // 加载导航栏
-                const navResponse = await fetch('./modules/nav.html');
-                const navHtml = await navResponse.text();
-                document.getElementById('mainHeader').innerHTML = navHtml;
+                const navHtml = await (await fetch('./modules/nav.html')).text();
+            document.getElementById('mainHeader').innerHTML = navHtml;
 
-                // 加载背景面板
-                const bgPanelResponse = await fetch('./modules/background-panel.html');
-                const bgPanelHtml = await bgPanelResponse.text();
+            const bgPanelHtml = await (await fetch('./modules/background-panel.html')).text();
+            document.getElementById('backgroundPanel').innerHTML = bgPanelHtml;
                 document.getElementById('backgroundPanel').innerHTML = bgPanelHtml;
 
                 // 加载页面内容

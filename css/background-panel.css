@@ -1,28 +1,27 @@
-/* 背景设置面板 */
 .background-panel {
     position: fixed;
-    top: 5rem; /* 距离顶部 */
-    right: 5vw; /* 距离右侧 */
+    top: 5rem;
+    right: 5vw;
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
     box-shadow: 0 5px 20px var(--shadow);
     padding: 1.25rem;
-    width: min(90vw, 320px); /* 有限宽度 */
-    z-index: 1001;
+    width: min(90vw, 320px);
+    z-index: 2000;
     display: none;
     transition: var(--transition);
     border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
 }
 
 .background-panel.active {
-    display: block;
+    display: block !important;
     animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
     from { 
         opacity: 0; 
-        transform: translateY(-10px) translateX(0); /* 从上方淡入 */
+        transform: translateY(-10px) translateX(0);
     }
     to { 
         opacity: 1; 
@@ -92,7 +91,6 @@
     background-image: url('../images/flowers.avif');
 }
 
-/* 响应式 */
 @media (max-width: 768px) {
     .background-panel {
         top: 4.375rem;

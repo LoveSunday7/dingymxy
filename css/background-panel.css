@@ -18,7 +18,7 @@
     animation: fadeIn 0.3s ease;
 }
 
-.background-panel.active.background-panel {
+#background-panel.active.background-panel {
     display: block;
 }
 

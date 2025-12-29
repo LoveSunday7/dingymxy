@@ -5,12 +5,18 @@ function initTheme() {
     
     const themeIcon = themeToggle.querySelector('i');
     
-    // 检查本地存储中的主题偏好
+    // 检查本地存储中的主题偏好，默认设为'dark'
     const savedTheme = localStorage.getItem('theme') || 'dark';
+    
+    // 应用保存的主题
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         themeIcon.classList.remove('fa-moon');
         themeIcon.classList.add('fa-sun');
+    } else {
+        document.body.classList.remove('dark-mode');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
     }
     
     themeToggle.addEventListener('click', () => {

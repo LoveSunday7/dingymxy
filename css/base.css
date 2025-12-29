@@ -7,7 +7,6 @@
     --card-bg: #ffffff;
     --accent-color: #7ed321;
     --shadow: rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
     --background-image: url('../images/star.avif');
     --background-overlay: rgba(255, 255, 255, 0.85);
     --nav-height: 4rem;

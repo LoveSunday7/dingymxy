@@ -1,0 +1,180 @@
+/* 朋友圈页面样式 */
+.friends-timeline {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.friend-moment {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.5rem var(--shadow);
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    color: var(--text-color); /* 确保文字颜色使用主题变量 */
+}
+
+.moment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.moment-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    margin-right: 1rem;
+}
+
+.moment-user-info {
+    flex: 1;
+}
+
+.moment-username {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.25rem;
+    font-family: "STXingkai", "华文行楷", "Microsoft YaHei", sans-serif;
+}
+
+.moment-time {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.moment-content {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    font-family: "STKaiti", "KaiTi", "楷体", "Microsoft YaHei", serif;
+    color: var(--text-color); /* 确保正文文字颜色使用主题变量 */
+}
+
+.moment-images {
+    margin-top: 1rem;
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.image-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background-color: #f5f5f5;
+    aspect-ratio: 1;
+    cursor: pointer; /* 添加光标指针，表示可点击 */
+}
+
+.dark-mode .image-item {
+    background-color: #2a2a2a;
+}
+
+.image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.image-item:hover img {
+    transform: scale(1.05);
+}
+
+/* 单张图片样式 */
+.image-item.single {
+    grid-column: span 3;
+    aspect-ratio: 16/9;
+}
+
+/* 两张图片样式 */
+.image-item:nth-child(1):nth-last-child(2),
+.image-item:nth-child(2):nth-last-child(1) {
+    grid-column: span 1;
+}
+
+/* 四张图片样式 */
+.image-item:nth-child(1):nth-last-child(4),
+.image-item:nth-child(2):nth-last-child(3),
+.image-item:nth-child(3):nth-last-child(2),
+.image-item:nth-child(4):nth-last-child(1) {
+    grid-column: span 1;
+}
+
+.moment-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+}
+
+.moment-action {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: "STKaiti", "KaiTi", "楷体", "Microsoft YaHei", serif;
+}
+
+.moment-action:hover {
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    color: var(--primary-color);
+}
+
+.moment-action i {
+    font-size: 1rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .friend-moment {
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .image-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .image-item.single {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .friend-moment {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .moment-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    .image-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .moment-actions {
+        gap: 0.5rem;
+    }
+    
+    .moment-action {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}

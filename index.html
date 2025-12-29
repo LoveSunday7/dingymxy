@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./css/pages/experience.css">
     <link rel="stylesheet" href="./css/pages/skills.css">
     <link rel="stylesheet" href="./css/pages/contact.css">
+    <link rel="stylesheet" href="./css/pages/friends.css"> <!-- 新增朋友圈样式 -->
 </head>
 
 <body>
@@ -45,6 +46,9 @@
         <!-- 技能与项目页面 -->
         <section id="skills" class="page"></section>
 
+        <!-- 朋友圈页面 --> <!-- 新增朋友圈页面 -->
+        <section id="friends" class="page"></section>
+
         <!-- 联系我页面 -->
         <section id="contact" class="page"></section>
     </main>
@@ -64,6 +68,7 @@
     <script src="./js/pages/about.js"></script>
     <script src="./js/pages/experience.js"></script>
     <script src="./js/pages/skills.js"></script>
+    <script src="./js/pages/friends.js"></script> <!-- 新增朋友圈JS -->
     <script src="./js/pages/contact.js"></script>
 
     <!-- 初始化加载 -->
@@ -84,7 +89,7 @@
                 document.getElementById('backgroundPanel').innerHTML = bgPanelHtml;
 
                 // 加载页面内容
-                const pageIds = ['home', 'about', 'experience', 'skills', 'contact'];
+                const pageIds = ['home', 'about', 'experience', 'skills', 'friends', 'contact']; // 添加friends
                 for (const pageId of pageIds) {
                     const response = await fetch(`./modules/pages/${pageId}.html`);
                     const html = await response.text();
@@ -112,6 +117,7 @@
                     if (typeof initAbout === 'function') initAbout();
                     if (typeof initExperience === 'function') initExperience();
                     if (typeof initSkills === 'function') initSkills();
+                    if (typeof initFriends === 'function') initFriends(); // 添加朋友圈初始化
                     if (typeof initContact === 'function') initContact();
 
                     // 初始化滚动效果

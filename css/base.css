@@ -197,25 +197,24 @@ body {
     }
 }
 
-/* 添加页脚样式到base.css的末尾 */
-
 /* 页脚样式 */
 footer {
     text-align: center;
-    padding: 2.5rem 0;
+    padding: 1rem 0; /* 进一步降低高度 */
     background-color: var(--card-bg);
-    margin-top: 5rem;
+    margin-top: 1.5rem; /* 进一步降低上边距 */
     position: relative;
     overflow: hidden;
     border-top: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    font-family: 'Brush Script MT', cursive; /* 添加艺术字体 */
 }
 
 .footer-wave {
     position: absolute;
-    top: -3.125rem;
+    top: -1rem; /* 进一步降低波浪高度 */
     left: 0;
     width: 100%;
-    height: 3.125rem;
+    height: 1rem; /* 进一步降低波浪高度 */
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     opacity: 0.1;
 }
@@ -226,28 +225,22 @@ footer {
 }
 
 .footer-logo {
-    font-size: clamp(1.8rem, 4vw, 2.2rem);
+    font-size: clamp(1.5rem, 4vw, 1.8rem); /* 进一步减小字体 */
     font-weight: 700;
     color: var(--primary-color);
-    margin-bottom: 1.25rem;
-}
-
-.footer-tagline {
-    font-size: clamp(0.95rem, 2vw, 1.1rem);
-    color: var(--text-color);
-    margin-bottom: 1.875rem;
-    opacity: 0.8;
+    margin-bottom: 0.5rem; /* 减少间距 */
+    font-family: 'Brush Script MT', cursive; /* 艺术字体 */
 }
 
 .footer-icons {
     display: flex;
     justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 1.875rem;
+    gap: 1rem; /* 进一步减小间距 */
+    margin-bottom: 0.75rem; /* 减少间距 */
 }
 
 .footer-icon {
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* 进一步减小图标 */
     color: var(--primary-color);
     transition: var(--transition);
     cursor: pointer;
@@ -255,8 +248,8 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem; /* 进一步减小尺寸 */
+    height: 2rem; /* 进一步减小尺寸 */
     border-radius: 50%;
     background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
 }
@@ -264,12 +257,14 @@ footer {
 .footer-icon:hover {
     color: var(--secondary-color);
     background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.2);
-    transform: translateY(-0.3125rem);
+    transform: translateY(-0.2rem);
 }
 
 .footer-text {
     color: var(--text-color);
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* 进一步减小字体 */
     opacity: 0.7;
-    margin-bottom: 0.5rem;
+    font-family: 'Brush Script MT', cursive; /* 艺术字体 */
+    line-height: 1.4; /* 增加行高，使文本更清晰 */
+    margin: 0 1rem; /* 添加左右边距，避免文本贴边 */
 }

@@ -35,6 +35,15 @@ function initRouter() {
                 initScrollAnimation();
             }
         }, 100);
+        
+        // 如果是博客页面，检查是否需要显示详情
+        if (pageId === 'blog') {
+            setTimeout(() => {
+                if (typeof initBlog === 'function') {
+                    initBlog();
+                }
+            }, 200);
+        }
     }
     
     // 为导航链接添加点击事件
@@ -56,7 +65,12 @@ function initRouter() {
     // 监听URL哈希变化
     window.addEventListener('hashchange', () => {
         const pageId = window.location.hash.substring(1) || 'home';
-        switchPage(pageId);
+        if (pageId.startsWith('blog/')) {
+            // 如果是博客详情，确保博客页面已激活
+            switchPage('blog');
+        } else {
+            switchPage(pageId);
+        }
     });
     
     // 监听浏览器前进后退

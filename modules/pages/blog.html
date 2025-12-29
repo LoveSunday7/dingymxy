@@ -82,25 +82,25 @@
                 <h4><i class="fas fa-fire"></i> 热门文章</h4>
                 <ul class="hot-posts">
                     <li>
-                        <a href="#" class="hot-post-link">
+                        <a href="#" class="hot-post-link" data-post="react-18">
                             <span class="hot-post-title">React 18新特性深度解析</span>
                             <span class="hot-post-views">2,548 阅读</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="hot-post-link">
+                        <a href="#" class="hot-post-link" data-post="microfrontend">
                             <span class="hot-post-title">微前端架构落地实践</span>
                             <span class="hot-post-views">3,892 阅读</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="hot-post-link">
+                        <a href="#" class="hot-post-link" data-post="programming-journey">
                             <span class="hot-post-title">五年编程生涯感悟</span>
                             <span class="hot-post-views">4,892 阅读</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="hot-post-link">
+                        <a href="#" class="hot-post-link" data-post="async-programming">
                             <span class="hot-post-title">JavaScript异步编程指南</span>
                             <span class="hot-post-views">3,025 阅读</span>
                         </a>
@@ -112,11 +112,11 @@
             <div class="sidebar-card">
                 <h4><i class="fas fa-archive"></i> 文章归档</h4>
                 <ul class="archive-list">
-                    <li><a href="#">2024年3月 (2)</a></li>
-                    <li><a href="#">2024年2月 (3)</a></li>
-                    <li><a href="#">2024年1月 (1)</a></li>
-                    <li><a href="#">2023年12月 (4)</a></li>
-                    <li><a href="#">2023年11月 (2)</a></li>
+                    <li><a href="#" data-month="2024-03">2024年3月 (2)</a></li>
+                    <li><a href="#" data-month="2024-02">2024年2月 (3)</a></li>
+                    <li><a href="#" data-month="2024-01">2024年1月 (1)</a></li>
+                    <li><a href="#" data-month="2023-12">2023年12月 (4)</a></li>
+                    <li><a href="#" data-month="2023-11">2023年11月 (2)</a></li>
                 </ul>
             </div>
             
@@ -131,10 +131,10 @@
             </div>
         </aside>
         
-        <!-- 博客文章列表 -->
-        <div class="blog-content">
+        <!-- 博客文章列表（默认显示） -->
+        <div class="blog-content" id="blogList">
             <!-- 博客文章1 -->
-            <article class="blog-post" data-tags="frontend,react,performance">
+            <article class="blog-post" data-tags="frontend,react,performance" data-post="react-18">
                 <div class="post-header">
                     <div class="post-category">
                         <span class="category-badge frontend">前端开发</span>
@@ -160,12 +160,12 @@
                         <span><i class="fas fa-tag"></i> 性能优化</span>
                         <span><i class="fas fa-tag"></i> 并发渲染</span>
                     </div>
-                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                    <button class="read-more-btn" data-post="react-18">阅读全文 <i class="fas fa-arrow-right"></i></button>
                 </div>
             </article>
             
             <!-- 博客文章2 -->
-            <article class="blog-post featured" data-tags="frontend,javascript,architecture">
+            <article class="blog-post featured" data-tags="frontend,javascript,architecture" data-post="microfrontend">
                 <div class="featured-badge">精选</div>
                 <div class="post-header">
                     <div class="post-category">
@@ -192,12 +192,12 @@
                         <span><i class="fas fa-tag"></i> 架构设计</span>
                         <span><i class="fas fa-tag"></i> 乾坤</span>
                     </div>
-                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                    <button class="read-more-btn" data-post="microfrontend">阅读全文 <i class="fas fa-arrow-right"></i></button>
                 </div>
             </article>
             
             <!-- 博客文章3 -->
-            <article class="blog-post" data-tags="typescript,frontend">
+            <article class="blog-post" data-tags="typescript,frontend" data-post="typescript-advanced">
                 <div class="post-header">
                     <div class="post-category">
                         <span class="category-badge frontend">前端开发</span>
@@ -223,12 +223,12 @@
                         <span><i class="fas fa-tag"></i> 类型系统</span>
                         <span><i class="fas fa-tag"></i> 泛型</span>
                     </div>
-                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                    <button class="read-more-btn" data-post="typescript-advanced">阅读全文 <i class="fas fa-arrow-right"></i></button>
                 </div>
             </article>
             
             <!-- 博客文章4 -->
-            <article class="blog-post" data-tags="vue,frontend,performance">
+            <article class="blog-post" data-tags="vue,frontend,performance" data-post="vue3-composition">
                 <div class="post-header">
                     <div class="post-category">
                         <span class="category-badge frontend">前端开发</span>
@@ -254,12 +254,12 @@
                         <span><i class="fas fa-tag"></i> Composition API</span>
                         <span><i class="fas fa-tag"></i> 性能优化</span>
                     </div>
-                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                    <button class="read-more-btn" data-post="vue3-composition">阅读全文 <i class="fas fa-arrow-right"></i></button>
                 </div>
             </article>
             
             <!-- 博客文章5 -->
-            <article class="blog-post" data-tags="javascript,frontend">
+            <article class="blog-post" data-tags="javascript,frontend" data-post="async-programming">
                 <div class="post-header">
                     <div class="post-category">
                         <span class="category-badge frontend">前端开发</span>
@@ -285,12 +285,12 @@
                         <span><i class="fas fa-tag"></i> 异步编程</span>
                         <span><i class="fas fa-tag"></i> Promise</span>
                     </div>
-                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                    <button class="read-more-btn" data-post="async-programming">阅读全文 <i class="fas fa-arrow-right"></i></button>
                 </div>
             </article>
             
             <!-- 博客文章6 -->
-            <article class="blog-post" data-tags="life,frontend">
+            <article class="blog-post" data-tags="life,frontend" data-post="programming-journey">
                 <div class="post-header">
                     <div class="post-category">
                         <span class="category-badge life">生活感悟</span>
@@ -315,14 +315,19 @@
                         <span><i class="fas fa-tag"></i> 成长历程</span>
                         <span><i class="fas fa-tag"></i> 学习心得</span>
                     </div>
-                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                    <button class="read-more-btn" data-post="programming-journey">阅读全文 <i class="fas fa-arrow-right"></i></button>
                 </div>
             </article>
+        </div>
+        
+        <!-- 博客详情页面（默认隐藏） -->
+        <div class="blog-detail" id="blogDetail" style="display: none;">
+            <!-- 详情内容由JavaScript动态生成 -->
         </div>
     </div>
     
     <!-- 分页 -->
-    <div class="pagination">
+    <div class="pagination" id="blogPagination">
         <button class="page-btn disabled"><i class="fas fa-chevron-left"></i> 上一页</button>
         <div class="page-numbers">
             <span class="page-number active">1</span>

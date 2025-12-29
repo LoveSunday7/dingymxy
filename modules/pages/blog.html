@@ -1,0 +1,335 @@
+<div class="container">
+    <h2 class="page-title">技术博客</h2>
+    
+    <!-- 博客搜索和筛选 -->
+    <div class="blog-controls">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="blogSearch" placeholder="搜索博客文章...">
+            <button class="search-btn">搜索</button>
+        </div>
+        
+        <div class="blog-filters">
+            <div class="filter-tags">
+                <button class="tag-btn active" data-tag="all">全部</button>
+                <button class="tag-btn" data-tag="frontend">前端开发</button>
+                <button class="tag-btn" data-tag="javascript">JavaScript</button>
+                <button class="tag-btn" data-tag="react">React</button>
+                <button class="tag-btn" data-tag="vue">Vue.js</button>
+                <button class="tag-btn" data-tag="typescript">TypeScript</button>
+                <button class="tag-btn" data-tag="architecture">架构设计</button>
+                <button class="tag-btn" data-tag="performance">性能优化</button>
+                <button class="tag-btn" data-tag="life">生活感悟</button>
+            </div>
+            
+            <div class="sort-options">
+                <span>排序：</span>
+                <select id="blogSort">
+                    <option value="newest">最新发布</option>
+                    <option value="popular">最受欢迎</option>
+                    <option value="views">最多阅读</option>
+                    <option value="comments">最多评论</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 博客文章列表 -->
+    <div class="blog-container">
+        <div class="blog-content">
+            <!-- 博客文章1 -->
+            <article class="blog-post" data-tags="frontend,react,performance">
+                <div class="post-header">
+                    <div class="post-category">
+                        <span class="category-badge frontend">前端开发</span>
+                        <span class="category-badge react">React</span>
+                    </div>
+                    <h3 class="post-title">React 18新特性深度解析：并发渲染与Suspense的应用实践</h3>
+                    <div class="post-meta">
+                        <span class="post-author"><i class="fas fa-user"></i> 黑色小猫</span>
+                        <span class="post-date"><i class="far fa-calendar"></i> 2024-03-15</span>
+                        <span class="post-views"><i class="far fa-eye"></i> 2,548</span>
+                        <span class="post-comments"><i class="far fa-comment"></i> 86</span>
+                        <span class="post-likes"><i class="far fa-heart"></i> 152</span>
+                    </div>
+                </div>
+                
+                <div class="post-excerpt">
+                    <p>React 18带来了革命性的并发渲染能力，彻底改变了我们构建React应用的方式。本文将深入探讨useTransition、useDeferredValue等新API的实际应用场景，并通过完整的代码示例展示如何利用并发特性优化大型应用的性能...</p>
+                </div>
+                
+                <div class="post-footer">
+                    <div class="post-tags">
+                        <span><i class="fas fa-tag"></i> React</span>
+                        <span><i class="fas fa-tag"></i> 性能优化</span>
+                        <span><i class="fas fa-tag"></i> 并发渲染</span>
+                    </div>
+                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </article>
+            
+            <!-- 博客文章2 -->
+            <article class="blog-post featured" data-tags="frontend,javascript,architecture">
+                <div class="featured-badge">精选</div>
+                <div class="post-header">
+                    <div class="post-category">
+                        <span class="category-badge frontend">前端开发</span>
+                        <span class="category-badge javascript">JavaScript</span>
+                    </div>
+                    <h3 class="post-title">微前端架构在大型企业应用中的落地实践与挑战</h3>
+                    <div class="post-meta">
+                        <span class="post-author"><i class="fas fa-user"></i> 黑色小猫</span>
+                        <span class="post-date"><i class="far fa-calendar"></i> 2024-02-28</span>
+                        <span class="post-views"><i class="far fa-eye"></i> 3,892</span>
+                        <span class="post-comments"><i class="far fa-comment"></i> 124</span>
+                        <span class="post-likes"><i class="far fa-heart"></i> 235</span>
+                    </div>
+                </div>
+                
+                <div class="post-excerpt">
+                    <p>随着企业应用规模的不断扩大，微前端架构成为解决复杂性问题的重要方案。本文将分享在大型电商平台中实施微前端架构的完整历程，包括乾坤(Qiankun)框架的选型理由、模块联邦的实现细节、以及在实际项目中遇到的性能问题和解决方案...</p>
+                </div>
+                
+                <div class="post-footer">
+                    <div class="post-tags">
+                        <span><i class="fas fa-tag"></i> 微前端</span>
+                        <span><i class="fas fa-tag"></i> 架构设计</span>
+                        <span><i class="fas fa-tag"></i> 乾坤</span>
+                    </div>
+                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </article>
+            
+            <!-- 博客文章3 -->
+            <article class="blog-post" data-tags="typescript,frontend">
+                <div class="post-header">
+                    <div class="post-category">
+                        <span class="category-badge frontend">前端开发</span>
+                        <span class="category-badge typescript">TypeScript</span>
+                    </div>
+                    <h3 class="post-title">TypeScript高级类型编程：从泛型到条件类型的实战应用</h3>
+                    <div class="post-meta">
+                        <span class="post-author"><i class="fas fa-user"></i> 黑色小猫</span>
+                        <span class="post-date"><i class="far fa-calendar"></i> 2024-02-10</span>
+                        <span class="post-views"><i class="far fa-eye"></i> 1,874</span>
+                        <span class="post-comments"><i class="far fa-comment"></i> 45</span>
+                        <span class="post-likes"><i class="far fa-heart"></i> 89</span>
+                    </div>
+                </div>
+                
+                <div class="post-excerpt">
+                    <p>TypeScript的类型系统提供了强大的编程能力，但很多开发者仅仅停留在基础类型的使用。本文将深入探讨条件类型、映射类型、模板字面量类型等高级特性，并通过实际案例展示如何构建类型安全的复杂系统...</p>
+                </div>
+                
+                <div class="post-footer">
+                    <div class="post-tags">
+                        <span><i class="fas fa-tag"></i> TypeScript</span>
+                        <span><i class="fas fa-tag"></i> 类型系统</span>
+                        <span><i class="fas fa-tag"></i> 泛型</span>
+                    </div>
+                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </article>
+            
+            <!-- 博客文章4 -->
+            <article class="blog-post" data-tags="vue,frontend,performance">
+                <div class="post-header">
+                    <div class="post-category">
+                        <span class="category-badge frontend">前端开发</span>
+                        <span class="category-badge vue">Vue.js</span>
+                    </div>
+                    <h3 class="post-title">Vue 3 Composition API最佳实践：从Options API到Composition API的平滑迁移</h3>
+                    <div class="post-meta">
+                        <span class="post-author"><i class="fas fa-user"></i> 黑色小猫</span>
+                        <span class="post-date"><i class="far fa-calendar"></i> 2024-01-22</span>
+                        <span class="post-views"><i class="far fa-eye"></i> 2,157</span>
+                        <span class="post-comments"><i class="far fa-comment"></i> 67</span>
+                        <span class="post-likes"><i class="far fa-heart"></i> 112</span>
+                    </div>
+                </div>
+                
+                <div class="post-excerpt">
+                    <p>Vue 3的Composition API彻底改变了我们组织Vue组件逻辑的方式。本文将通过实际项目案例，详细讲解如何将现有的Options API组件迁移到Composition API，并分享在这个过程中遇到的常见问题和解决方案...</p>
+                </div>
+                
+                <div class="post-footer">
+                    <div class="post-tags">
+                        <span><i class="fas fa-tag"></i> Vue 3</span>
+                        <span><i class="fas fa-tag"></i> Composition API</span>
+                        <span><i class="fas fa-tag"></i> 性能优化</span>
+                    </div>
+                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </article>
+            
+            <!-- 博客文章5 -->
+            <article class="blog-post" data-tags="javascript,frontend">
+                <div class="post-header">
+                    <div class="post-category">
+                        <span class="category-badge frontend">前端开发</span>
+                        <span class="category-badge javascript">JavaScript</span>
+                    </div>
+                    <h3 class="post-title">现代JavaScript异步编程完全指南：从Promise到Async/Await再到Observables</h3>
+                    <div class="post-meta">
+                        <span class="post-author"><i class="fas fa-user"></i> 黑色小猫</span>
+                        <span class="post-date"><i class="far fa-calendar"></i> 2023-12-15</span>
+                        <span class="post-views"><i class="far fa-eye"></i> 3,025</span>
+                        <span class="post-comments"><i class="far fa-comment"></i> 92</span>
+                        <span class="post-likes"><i class="far fa-heart"></i> 178</span>
+                    </div>
+                </div>
+                
+                <div class="post-excerpt">
+                    <p>异步编程是现代JavaScript开发的核心技能。本文将全面介绍JavaScript异步编程的演进历程，深入解析Promise、Async/Await、Generators等核心概念，并探讨RxJS在复杂异步场景下的应用...</p>
+                </div>
+                
+                <div class="post-footer">
+                    <div class="post-tags">
+                        <span><i class="fas fa-tag"></i> JavaScript</span>
+                        <span><i class="fas fa-tag"></i> 异步编程</span>
+                        <span><i class="fas fa-tag"></i> Promise</span>
+                    </div>
+                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </article>
+            
+            <!-- 博客文章6 -->
+            <article class="blog-post" data-tags="life,frontend">
+                <div class="post-header">
+                    <div class="post-category">
+                        <span class="category-badge life">生活感悟</span>
+                    </div>
+                    <h3 class="post-title">五年编程生涯感悟：从代码新手到架构师的成长之路</h3>
+                    <div class="post-meta">
+                        <span class="post-author"><i class="fas fa-user"></i> 黑色小猫</span>
+                        <span class="post-date"><i class="far fa-calendar"></i> 2023-11-30</span>
+                        <span class="post-views"><i class="far fa-eye"></i> 4,892</span>
+                        <span class="post-comments"><i class="far fa-comment"></i> 156</span>
+                        <span class="post-likes"><i class="far fa-heart"></i> 324</span>
+                    </div>
+                </div>
+                
+                <div class="post-excerpt">
+                    <p>回顾五年的编程生涯，从一个只会写静态页面的新手，成长为能够独立负责大型项目架构的前端工程师。本文分享了在这个过程中积累的经验教训、学习方法和职业规划建议，希望能为刚入行的开发者提供一些参考...</p>
+                </div>
+                
+                <div class="post-footer">
+                    <div class="post-tags">
+                        <span><i class="fas fa-tag"></i> 职业发展</span>
+                        <span><i class="fas fa-tag"></i> 成长历程</span>
+                        <span><i class="fas fa-tag"></i> 学习心得</span>
+                    </div>
+                    <button class="read-more-btn">阅读全文 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </article>
+        </div>
+        
+        <!-- 侧边栏 -->
+        <aside class="blog-sidebar">
+            <!-- 作者信息 -->
+            <div class="sidebar-card author-card">
+                <div class="author-header">
+                    <img src="./images/girlhead.jpg" alt="作者头像" class="author-avatar">
+                    <div class="author-info">
+                        <h4>黑色小猫</h4>
+                        <p>前端开发工程师</p>
+                    </div>
+                </div>
+                <div class="author-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">42</span>
+                        <span class="stat-label">文章</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">18.5K</span>
+                        <span class="stat-label">阅读</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">832</span>
+                        <span class="stat-label">粉丝</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 热门标签 -->
+            <div class="sidebar-card">
+                <h4><i class="fas fa-tags"></i> 热门标签</h4>
+                <div class="hot-tags">
+                    <span class="hot-tag" data-tag="frontend">前端开发</span>
+                    <span class="hot-tag" data-tag="javascript">JavaScript</span>
+                    <span class="hot-tag" data-tag="react">React</span>
+                    <span class="hot-tag" data-tag="vue">Vue.js</span>
+                    <span class="hot-tag" data-tag="typescript">TypeScript</span>
+                    <span class="hot-tag" data-tag="performance">性能优化</span>
+                    <span class="hot-tag" data-tag="architecture">架构设计</span>
+                </div>
+            </div>
+            
+            <!-- 热门文章 -->
+            <div class="sidebar-card">
+                <h4><i class="fas fa-fire"></i> 热门文章</h4>
+                <ul class="hot-posts">
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">React 18新特性深度解析</span>
+                            <span class="hot-post-views">2,548 阅读</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">微前端架构落地实践</span>
+                            <span class="hot-post-views">3,892 阅读</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">五年编程生涯感悟</span>
+                            <span class="hot-post-views">4,892 阅读</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">JavaScript异步编程指南</span>
+                            <span class="hot-post-views">3,025 阅读</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- 归档 -->
+            <div class="sidebar-card">
+                <h4><i class="fas fa-archive"></i> 文章归档</h4>
+                <ul class="archive-list">
+                    <li><a href="#">2024年3月 (2)</a></li>
+                    <li><a href="#">2024年2月 (3)</a></li>
+                    <li><a href="#">2024年1月 (1)</a></li>
+                    <li><a href="#">2023年12月 (4)</a></li>
+                    <li><a href="#">2023年11月 (2)</a></li>
+                </ul>
+            </div>
+            
+            <!-- 订阅 -->
+            <div class="sidebar-card subscribe-card">
+                <h4><i class="fas fa-envelope"></i> 订阅博客</h4>
+                <p>获取最新技术文章和更新通知</p>
+                <div class="subscribe-form">
+                    <input type="email" placeholder="输入您的邮箱">
+                    <button class="subscribe-btn">订阅</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- 分页 -->
+    <div class="pagination">
+        <button class="page-btn disabled"><i class="fas fa-chevron-left"></i> 上一页</button>
+        <div class="page-numbers">
+            <span class="page-number active">1</span>
+            <span class="page-number">2</span>
+            <span class="page-number">3</span>
+            <span class="page-number">4</span>
+            <span class="page-number">5</span>
+        </div>
+        <button class="page-btn">下一页 <i class="fas fa-chevron-right"></i></button>
+    </div>
+</div>

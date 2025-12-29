@@ -14,9 +14,10 @@
     
     <!-- 页面样式 -->
     <link rel="stylesheet" href="./css/pages/home.css">
+    <link rel="stylesheet" href="./css/pages/resume.css">
     <link rel="stylesheet" href="./css/pages/experience.css">
+    <link rel="stylesheet" href="./css/pages/blog.css"> <!-- 新增博客样式 -->
     <link rel="stylesheet" href="./css/pages/friends.css">
-    <link rel="stylesheet" href="./css/pages/resume.css"> <!-- 新增简历样式 -->
     <link rel="stylesheet" href="./css/pages/contact.css">
 </head>
 
@@ -36,11 +37,14 @@
         <!-- 首页 -->
         <section id="home" class="page active"></section>
 
-        <!-- 简历页面 --> <!-- 替换关于我和技能页面 -->
+        <!-- 简历页面 -->
         <section id="resume" class="page"></section>
 
         <!-- 经历页面 -->
         <section id="experience" class="page"></section>
+
+        <!-- 博客页面 --> <!-- 新增博客页面 -->
+        <section id="blog" class="page"></section>
 
         <!-- 朋友圈页面 -->
         <section id="friends" class="page"></section>
@@ -61,8 +65,9 @@
 
     <!-- 页面特定的JavaScript -->
     <script src="./js/pages/home.js"></script>
-    <script src="./js/pages/resume.js"></script> <!-- 新增简历JS -->
+    <script src="./js/pages/resume.js"></script>
     <script src="./js/pages/experience.js"></script>
+    <script src="./js/pages/blog.js"></script> <!-- 新增博客JS -->
     <script src="./js/pages/friends.js"></script>
     <script src="./js/pages/contact.js"></script>
 
@@ -81,7 +86,7 @@
                 document.getElementById('backgroundPanel').innerHTML = bgPanelHtml;
 
                 // 加载页面内容
-                const pageIds = ['home', 'resume', 'experience', 'friends', 'contact']; // 更新页面ID
+                const pageIds = ['home', 'resume', 'experience', 'blog', 'friends', 'contact']; // 添加blog
                 for (const pageId of pageIds) {
                     const response = await fetch(`./modules/pages/${pageId}.html`);
                     const html = await response.text();
@@ -106,8 +111,9 @@
 
                     // 初始化页面特定的功能
                     if (typeof initHome === 'function') initHome();
-                    if (typeof initResume === 'function') initResume(); // 新增简历初始化
+                    if (typeof initResume === 'function') initResume();
                     if (typeof initExperience === 'function') initExperience();
+                    if (typeof initBlog === 'function') initBlog(); // 添加博客初始化
                     if (typeof initFriends === 'function') initFriends();
                     if (typeof initContact === 'function') initContact();
 

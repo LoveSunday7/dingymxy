@@ -34,8 +34,104 @@
         </div>
     </div>
     
-    <!-- 博客文章列表 -->
+    <!-- 博客布局 - 侧边栏在左边，文章列表在右边 -->
     <div class="blog-container">
+        <!-- 侧边栏 -->
+        <aside class="blog-sidebar">
+            <!-- 作者信息 -->
+            <div class="sidebar-card author-card">
+                <div class="author-header">
+                    <img src="./images/girlhead.jpg" alt="作者头像" class="author-avatar">
+                    <div class="author-info">
+                        <h4>黑色小猫</h4>
+                        <p>前端开发工程师</p>
+                    </div>
+                </div>
+                <div class="author-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">42</span>
+                        <span class="stat-label">文章</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">18.5K</span>
+                        <span class="stat-label">阅读</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">832</span>
+                        <span class="stat-label">粉丝</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 热门标签 -->
+            <div class="sidebar-card">
+                <h4><i class="fas fa-tags"></i> 热门标签</h4>
+                <div class="hot-tags">
+                    <span class="hot-tag" data-tag="frontend">前端开发</span>
+                    <span class="hot-tag" data-tag="javascript">JavaScript</span>
+                    <span class="hot-tag" data-tag="react">React</span>
+                    <span class="hot-tag" data-tag="vue">Vue.js</span>
+                    <span class="hot-tag" data-tag="typescript">TypeScript</span>
+                    <span class="hot-tag" data-tag="performance">性能优化</span>
+                    <span class="hot-tag" data-tag="architecture">架构设计</span>
+                </div>
+            </div>
+            
+            <!-- 热门文章 -->
+            <div class="sidebar-card">
+                <h4><i class="fas fa-fire"></i> 热门文章</h4>
+                <ul class="hot-posts">
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">React 18新特性深度解析</span>
+                            <span class="hot-post-views">2,548 阅读</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">微前端架构落地实践</span>
+                            <span class="hot-post-views">3,892 阅读</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">五年编程生涯感悟</span>
+                            <span class="hot-post-views">4,892 阅读</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="hot-post-link">
+                            <span class="hot-post-title">JavaScript异步编程指南</span>
+                            <span class="hot-post-views">3,025 阅读</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- 归档 -->
+            <div class="sidebar-card">
+                <h4><i class="fas fa-archive"></i> 文章归档</h4>
+                <ul class="archive-list">
+                    <li><a href="#">2024年3月 (2)</a></li>
+                    <li><a href="#">2024年2月 (3)</a></li>
+                    <li><a href="#">2024年1月 (1)</a></li>
+                    <li><a href="#">2023年12月 (4)</a></li>
+                    <li><a href="#">2023年11月 (2)</a></li>
+                </ul>
+            </div>
+            
+            <!-- 订阅 -->
+            <div class="sidebar-card subscribe-card">
+                <h4><i class="fas fa-envelope"></i> 订阅博客</h4>
+                <p>获取最新技术文章和更新通知</p>
+                <div class="subscribe-form">
+                    <input type="email" placeholder="输入您的邮箱">
+                    <button class="subscribe-btn">订阅</button>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 博客文章列表 -->
         <div class="blog-content">
             <!-- 博客文章1 -->
             <article class="blog-post" data-tags="frontend,react,performance">
@@ -223,101 +319,6 @@
                 </div>
             </article>
         </div>
-        
-        <!-- 侧边栏 -->
-        <aside class="blog-sidebar">
-            <!-- 作者信息 -->
-            <div class="sidebar-card author-card">
-                <div class="author-header">
-                    <img src="./images/girlhead.jpg" alt="作者头像" class="author-avatar">
-                    <div class="author-info">
-                        <h4>黑色小猫</h4>
-                        <p>前端开发工程师</p>
-                    </div>
-                </div>
-                <div class="author-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">42</span>
-                        <span class="stat-label">文章</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">18.5K</span>
-                        <span class="stat-label">阅读</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">832</span>
-                        <span class="stat-label">粉丝</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 热门标签 -->
-            <div class="sidebar-card">
-                <h4><i class="fas fa-tags"></i> 热门标签</h4>
-                <div class="hot-tags">
-                    <span class="hot-tag" data-tag="frontend">前端开发</span>
-                    <span class="hot-tag" data-tag="javascript">JavaScript</span>
-                    <span class="hot-tag" data-tag="react">React</span>
-                    <span class="hot-tag" data-tag="vue">Vue.js</span>
-                    <span class="hot-tag" data-tag="typescript">TypeScript</span>
-                    <span class="hot-tag" data-tag="performance">性能优化</span>
-                    <span class="hot-tag" data-tag="architecture">架构设计</span>
-                </div>
-            </div>
-            
-            <!-- 热门文章 -->
-            <div class="sidebar-card">
-                <h4><i class="fas fa-fire"></i> 热门文章</h4>
-                <ul class="hot-posts">
-                    <li>
-                        <a href="#" class="hot-post-link">
-                            <span class="hot-post-title">React 18新特性深度解析</span>
-                            <span class="hot-post-views">2,548 阅读</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="hot-post-link">
-                            <span class="hot-post-title">微前端架构落地实践</span>
-                            <span class="hot-post-views">3,892 阅读</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="hot-post-link">
-                            <span class="hot-post-title">五年编程生涯感悟</span>
-                            <span class="hot-post-views">4,892 阅读</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="hot-post-link">
-                            <span class="hot-post-title">JavaScript异步编程指南</span>
-                            <span class="hot-post-views">3,025 阅读</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            
-            <!-- 归档 -->
-            <div class="sidebar-card">
-                <h4><i class="fas fa-archive"></i> 文章归档</h4>
-                <ul class="archive-list">
-                    <li><a href="#">2024年3月 (2)</a></li>
-                    <li><a href="#">2024年2月 (3)</a></li>
-                    <li><a href="#">2024年1月 (1)</a></li>
-                    <li><a href="#">2023年12月 (4)</a></li>
-                    <li><a href="#">2023年11月 (2)</a></li>
-                </ul>
-            </div>
-            
-            <!-- 订阅 -->
-            <div class="sidebar-card subscribe-card">
-                <h4><i class="fas fa-envelope"></i> 订阅博客</h4>
-                <p>获取最新技术文章和更新通知</p>
-                <div class="subscribe-form">
-                    <input type="email" placeholder="输入您的邮箱">
-                    <button class="subscribe-btn">订阅</button>
-                </div>
-            </div>
-        </aside>
     </div>
     
     <!-- 分页 -->

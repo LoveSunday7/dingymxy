@@ -30,10 +30,10 @@
     font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
 }
 
-/* 技能类别 */
+/* 技能类别 - 改为纵向分布 */
 .skills-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    display: flex;
+    flex-direction: column; /* 改为纵向排列 */
     gap: 1.5rem;
     margin-top: 1rem;
 }
@@ -43,13 +43,31 @@
     padding: 1.25rem;
     border-radius: 0.75rem;
     border-left: 4px solid var(--primary-color);
+    transition: var(--transition);
 }
 
-.skill-category h4 {
-    color: var(--primary-color);
+.skill-category:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+}
+
+/* 技能类别头部 */
+.skill-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin-bottom: 0.75rem;
-    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+    color: var(--primary-color);
+}
+
+.skill-header i {
+    font-size: 1.5rem;
+}
+
+.skill-header h4 {
+    margin: 0;
     font-size: 1.1rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
 }
 
 .skill-category ul {
@@ -61,6 +79,48 @@
     margin-bottom: 0.5rem;
     line-height: 1.5;
     font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 特殊样式的前端技术方框 */
+#frontend-skill {
+    border-left: 4px solid #FFD700; /* 黄色边框 */
+    background-color: rgba(255, 215, 0, 0.05); /* 浅黄色背景 */
+    position: relative;
+    overflow: hidden;
+}
+
+#frontend-skill::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 3rem 3rem 0;
+    border-color: transparent #FFD700 transparent transparent;
+    z-index: 1;
+}
+
+#frontend-skill::after {
+    content: "核心技能";
+    position: absolute;
+    top: 0.75rem;
+    right: 0.5rem;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 2;
+    transform: rotate(45deg);
+    transform-origin: top right;
+}
+
+#frontend-skill .skill-header {
+    color: #DAA520; /* 金色标题 */
+}
+
+#frontend-skill .skill-header i {
+    color: #FFD700; /* 金色图标 */
 }
 
 /* 工作经历 */
@@ -317,7 +377,7 @@
 /* 响应式设计 */
 @media (max-width: 768px) {
     .skills-container {
-        grid-template-columns: 1fr;
+        gap: 1rem; /* 移动端减小间距 */
     }
     
     .info-grid {

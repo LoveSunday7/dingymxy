@@ -80,4 +80,55 @@
         </ul>
         <p style="margin-top: 20px;">如果你有合适的项目或想法，欢迎随时联系我，我们可以一起探讨如何实现它！</p>
     </div>
+    
+    <!-- 新增留言板 -->
+    <div class="card">
+        <h3><i class="fas fa-comment-dots"></i> 留言板</h3>
+        <p>欢迎留下你的想法、建议或问题。我会认真阅读每一条留言，并尽快回复。</p>
+        
+        <div class="message-board">
+            <!-- 留言表单 -->
+            <div class="message-form">
+                <h4><i class="fas fa-edit"></i> 发表留言</h4>
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="form-column">
+                            <label for="messageName"><i class="fas fa-user"></i> 姓名</label>
+                            <input type="text" id="messageName" placeholder="请输入您的姓名">
+                        </div>
+                        <div class="form-column">
+                            <label for="messageEmail"><i class="fas fa-envelope"></i> 邮箱</label>
+                            <input type="email" id="messageEmail" placeholder="请输入您的邮箱（可选）">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="messageContent"><i class="fas fa-comment"></i> 留言内容</label>
+                    <textarea id="messageContent" placeholder="请写下您的留言..." rows="4"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="messageSubmit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> 提交留言
+                    </button>
+                    <button type="button" id="messageClear" class="clear-btn">
+                        <i class="fas fa-eraser"></i> 清空
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 留言列表 -->
+            <div class="message-list">
+                <h4><i class="fas fa-comments"></i> 最新留言</h4>
+                <div id="messagesContainer">
+                    <!-- 留言将在这里动态显示 -->
+                    <div class="empty-message">
+                        <i class="far fa-comment-dots"></i>
+                        <p>还没有留言，快来发表第一条吧！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

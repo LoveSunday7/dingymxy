@@ -1,0 +1,357 @@
+/* 简历页面样式 */
+.resume-section {
+    margin-top: 1rem;
+}
+
+/* 基本信息网格 */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+}
+
+.info-label {
+    font-weight: bold;
+    min-width: 80px;
+    color: var(--primary-color);
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.info-content {
+    flex: 1;
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 技能类别 */
+.skills-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.skill-category {
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.05);
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.skill-category h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+    font-size: 1.1rem;
+}
+
+.skill-category ul {
+    padding-left: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.skill-category li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 工作经历 */
+.experience-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+}
+
+.experience-item:last-child {
+    border-bottom: none;
+}
+
+.experience-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.experience-header h4 {
+    color: var(--primary-color);
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+    font-size: 1.2rem;
+}
+
+.experience-period {
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.experience-company {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.experience-details ul {
+    padding-left: 1.25rem;
+}
+
+.experience-details li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 项目经历 */
+.project-item {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.05);
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.project-header h4 {
+    color: var(--primary-color);
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+    font-size: 1.2rem;
+}
+
+.project-period {
+    background-color: rgba(var(--secondary-color-rgb, 245, 166, 35), 0.1);
+    color: var(--secondary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.project-role {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--secondary-color);
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.project-details {
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+.project-details p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.project-details ul {
+    padding-left: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.project-details li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+/* 教育背景 */
+.education-item {
+    padding: 1.25rem;
+    background-color: rgba(var(--accent-color-rgb, 126, 211, 33), 0.05);
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--accent-color);
+}
+
+.education-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.education-header h4 {
+    color: var(--accent-color);
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+    font-size: 1.2rem;
+}
+
+.education-period {
+    background-color: rgba(var(--accent-color-rgb, 126, 211, 33), 0.1);
+    color: var(--accent-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.education-details {
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+.education-details p {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.education-details ul {
+    padding-left: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.education-details li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+/* 荣誉证书 */
+.awards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.award-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.05);
+    border-radius: 0.75rem;
+    transition: var(--transition);
+}
+
+.award-item:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+}
+
+.award-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-top: 0.25rem;
+}
+
+.award-content h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.award-content p {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 0.9rem;
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 个人特质 */
+.traits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.trait-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.05);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
+    transition: var(--transition);
+}
+
+.trait-item:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: 0 0.3125rem 0.9375rem var(--shadow);
+}
+
+.trait-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-top: 0.25rem;
+}
+
+.trait-content h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.trait-content p {
+    color: var(--text-color);
+    line-height: 1.5;
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 通用字体设置 */
+.resume-section h4 {
+    font-family: "SimHei", "黑体", "Microsoft YaHei", sans-serif; /* 黑体 */
+}
+
+.resume-section p, 
+.resume-section li, 
+.resume-section span {
+    font-family: "SimSun", "宋体", "Microsoft YaHei", serif; /* 宋体 */
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .skills-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .awards-grid,
+    .traits-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    
+    .experience-header,
+    .project-header,
+    .education-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .experience-period,
+    .project-period,
+    .education-period {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .awards-grid,
+    .traits-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .trait-item,
+    .award-item {
+        padding: 1rem;
+    }
+}

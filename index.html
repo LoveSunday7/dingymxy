@@ -14,11 +14,10 @@
     
     <!-- 页面样式 -->
     <link rel="stylesheet" href="./css/pages/home.css">
-    <link rel="stylesheet" href="./css/pages/about.css">
     <link rel="stylesheet" href="./css/pages/experience.css">
-    <link rel="stylesheet" href="./css/pages/skills.css">
+    <link rel="stylesheet" href="./css/pages/friends.css">
+    <link rel="stylesheet" href="./css/pages/resume.css"> <!-- 新增简历样式 -->
     <link rel="stylesheet" href="./css/pages/contact.css">
-    <link rel="stylesheet" href="./css/pages/friends.css"> <!-- 新增朋友圈样式 -->
 </head>
 
 <body>
@@ -37,16 +36,13 @@
         <!-- 首页 -->
         <section id="home" class="page active"></section>
 
-        <!-- 关于我页面 -->
-        <section id="about" class="page"></section>
+        <!-- 简历页面 --> <!-- 替换关于我和技能页面 -->
+        <section id="resume" class="page"></section>
 
         <!-- 经历页面 -->
         <section id="experience" class="page"></section>
 
-        <!-- 技能与项目页面 -->
-        <section id="skills" class="page"></section>
-
-        <!-- 朋友圈页面 --> <!-- 新增朋友圈页面 -->
+        <!-- 朋友圈页面 -->
         <section id="friends" class="page"></section>
 
         <!-- 联系我页面 -->
@@ -65,15 +61,12 @@
 
     <!-- 页面特定的JavaScript -->
     <script src="./js/pages/home.js"></script>
-    <script src="./js/pages/about.js"></script>
+    <script src="./js/pages/resume.js"></script> <!-- 新增简历JS -->
     <script src="./js/pages/experience.js"></script>
-    <script src="./js/pages/skills.js"></script>
-    <script src="./js/pages/friends.js"></script> <!-- 新增朋友圈JS -->
+    <script src="./js/pages/friends.js"></script>
     <script src="./js/pages/contact.js"></script>
 
     <!-- 初始化加载 -->
-    <!-- 在index.html中的初始化脚本更新 -->
-    <!-- 在index.html中更新初始化脚本 -->
     <script>
         // 加载HTML模块
         window.addEventListener('DOMContentLoaded', async () => {
@@ -82,14 +75,13 @@
 
                 // 加载导航栏
                 const navHtml = await (await fetch('./modules/nav.html')).text();
-            document.getElementById('mainHeader').innerHTML = navHtml;
+                document.getElementById('mainHeader').innerHTML = navHtml;
 
-            const bgPanelHtml = await (await fetch('./modules/background-panel.html')).text();
-            document.getElementById('backgroundPanel').innerHTML = bgPanelHtml;
+                const bgPanelHtml = await (await fetch('./modules/background-panel.html')).text();
                 document.getElementById('backgroundPanel').innerHTML = bgPanelHtml;
 
                 // 加载页面内容
-                const pageIds = ['home', 'about', 'experience', 'skills', 'friends', 'contact']; // 添加friends
+                const pageIds = ['home', 'resume', 'experience', 'friends', 'contact']; // 更新页面ID
                 for (const pageId of pageIds) {
                     const response = await fetch(`./modules/pages/${pageId}.html`);
                     const html = await response.text();
@@ -114,10 +106,9 @@
 
                     // 初始化页面特定的功能
                     if (typeof initHome === 'function') initHome();
-                    if (typeof initAbout === 'function') initAbout();
+                    if (typeof initResume === 'function') initResume(); // 新增简历初始化
                     if (typeof initExperience === 'function') initExperience();
-                    if (typeof initSkills === 'function') initSkills();
-                    if (typeof initFriends === 'function') initFriends(); // 添加朋友圈初始化
+                    if (typeof initFriends === 'function') initFriends();
                     if (typeof initContact === 'function') initContact();
 
                     // 初始化滚动效果
@@ -134,7 +125,7 @@
                         document.body.style.opacity = '1';
                     }, 100);
 
-                }, 200); // 稍微增加等待时间
+                }, 200);
 
             } catch (error) {
                 console.error('加载模块时出错:', error);

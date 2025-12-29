@@ -31,6 +31,14 @@
     display: inline-block;
 }
 
+/* 华文行楷 - 黑色小猫 */
+.chinese-calligraphy {
+    font-family: "STXingkai", "华文行楷", "Microsoft YaHei", sans-serif;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .hero h1::after {
     content: '';
     position: absolute;
@@ -40,6 +48,12 @@
     bottom: -0.3rem;
     left: 0;
     border-radius: 0.125rem;
+}
+
+/* 正楷字体 - 其他所有文字 */
+.regular-calligraphy {
+    font-family: "STKaiti", "KaiTi", "楷体", "Microsoft YaHei", serif;
+    letter-spacing: 0.5px;
 }
 
 .hero .tagline {
@@ -56,11 +70,23 @@
     line-height: 1.7;
 }
 
-.sun-icon {
-    color: var(--secondary-color);
-    font-size: clamp(1.5rem, 4vw, 2rem);
+/* 信封图标样式 */
+.envelope-icon {
+    color: var(--primary-color);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
     margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     animation: float 3s ease-in-out infinite;
+}
+
+.envelope-text {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 @keyframes float {
@@ -118,10 +144,6 @@
     
     .hero .tagline {
         font-size: 1.1rem;
-    }
-    
-    .intro-text {
-        font-size: 0.95rem;
     }
     
     .interest-item {

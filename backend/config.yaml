@@ -1,0 +1,90 @@
+# ============================================
+# 黑色小猫咪的GitHub小窝 - 后端配置文件
+# ============================================
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
+  # 前端地址（用于CORS跨域配置）
+  frontend_url: "http://172.18.217.177:5500"
+  # 允许的跨域来源列表
+  cors_origins:
+    - "http://172.18.217.177:5500"
+    - "http://localhost:5500"
+    - "http://127.0.0.1:5500"
+    - "http://localhost:8000"
+
+# 数据库配置
+database:
+  # SQLite数据库文件路径（相对于backend目录）
+  path: "data/blog.db"
+  # 是否在启动时自动创建表
+  auto_create_tables: true
+  # 是否插入示例数据（首次启动）
+  seed_data: true
+
+# JWT认证配置
+auth:
+  # JWT密钥（生产环境请务必修改为随机长字符串）
+  secret_key: "change-me-to-a-secure-random-string-in-production"
+  # Token过期时间（小时）
+  access_token_expire_hours: 24
+  # 管理员Token过期时间（小时）
+  admin_token_expire_hours: 8
+  # 算法
+  algorithm: "HS256"
+
+# 管理员配置（首次启动时自动创建）
+admin:
+  username: "admin"
+  # 生产环境请修改密码
+  password: "admin123"
+  email: "dym3411795482@qq.com"
+
+# 博客配置
+blog:
+  # 每页文章数
+  posts_per_page: 10
+  # 文章摘要最大长度
+  excerpt_max_length: 200
+  # 允许的标签
+  allowed_tags:
+    - "前端"
+    - "JavaScript"
+    - "React"
+    - "Vue"
+    - "TypeScript"
+    - "架构"
+    - "性能"
+    - "生活"
+    - "Python"
+    - "后端"
+  # 允许的分类
+  allowed_categories:
+    - "前端开发"
+    - "后端开发"
+    - "生活感悟"
+    - "技术分享"
+    - "项目实战"
+
+# 文件上传配置
+upload:
+  # 上传目录（相对于backend目录）
+  upload_dir: "data/uploads"
+  # 允许的图片类型
+  allowed_image_types:
+    - ".jpg"
+    - ".jpeg"
+    - ".png"
+    - ".gif"
+    - ".webp"
+  # 最大文件大小（MB）
+  max_file_size_mb: 5
+
+# 日志配置
+logging:
+  level: "INFO"
+  # 日志文件路径（相对于backend目录）
+  file: "data/app.log"

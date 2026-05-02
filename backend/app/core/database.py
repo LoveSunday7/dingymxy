@@ -149,6 +149,14 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 公开页面表（无需登录即可访问的页面）
+CREATE TABLE IF NOT EXISTS public_pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id TEXT NOT NULL UNIQUE,  -- 页面标识: home, resume, experience, blog, friends, contact
+    is_public INTEGER DEFAULT 0,   -- 0=需权限, 1=公开
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(is_published, published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category_id);
@@ -157,4 +165,5 @@ CREATE INDEX IF NOT EXISTS idx_permissions_resource ON permissions(resource_type
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id, is_approved);
 CREATE INDEX IF NOT EXISTS idx_users_access_code ON users(access_code);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_public_pages_page ON public_pages(page_id);
 """

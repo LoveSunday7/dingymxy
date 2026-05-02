@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="./css/base.css">
     <link rel="stylesheet" href="./css/nav.css">
     <link rel="stylesheet" href="./css/background-panel.css">
+    <link rel="stylesheet" href="./css/auth.css">
+    <link rel="stylesheet" href="./css/admin.css">
     
     <!-- 页面样式 -->
     <link rel="stylesheet" href="./css/pages/home.css">
@@ -57,11 +59,14 @@
     <footer></footer>
 
     <!-- 核心JavaScript文件 -->
+    <script src="./js/api.js"></script>
     <script src="./js/utils.js"></script>
     <script src="./js/theme.js"></script>
     <script src="./js/background.js"></script>
     <script src="./js/mobile-nav.js"></script>
     <script src="./js/router.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/admin.js"></script>
 
     <!-- 页面特定的JavaScript -->
     <script src="./js/pages/home.js"></script>
@@ -113,9 +118,17 @@
                     if (typeof initHome === 'function') initHome();
                     if (typeof initResume === 'function') initResume();
                     if (typeof initExperience === 'function') initExperience();
-                    if (typeof initBlog === 'function') initBlog(); // 添加博客初始化
+                    if (typeof initBlog === 'function') initBlog();
                     if (typeof initFriends === 'function') initFriends();
                     if (typeof initContact === 'function') initContact();
+                    if (typeof initAuth === 'function') initAuth();
+                    if (typeof initAdmin === 'function') initAdmin();
+
+                    // 登录按钮
+                    const authToggle = document.getElementById('authToggle');
+                    if (authToggle && typeof showAuthModal === 'function') {
+                        authToggle.addEventListener('click', showAuthModal);
+                    }
 
                     // 初始化滚动效果
                     if (typeof initScrollAnimation === 'function') initScrollAnimation();

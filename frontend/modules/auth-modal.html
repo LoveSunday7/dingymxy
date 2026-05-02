@@ -1,0 +1,48 @@
+<!-- 身份验证弹窗 -->
+<div class="auth-modal" id="authModal" style="display:none;">
+    <div class="auth-overlay"></div>
+    <div class="auth-card">
+        <button class="auth-close" id="authClose">&times;</button>
+        <h3 class="auth-title">身份验证</h3>
+
+        <!-- 访客验证表单 -->
+        <div id="visitorForm">
+            <p class="auth-desc">输入姓名和认证码，验证身份后即可查看专属内容</p>
+            <div class="auth-field">
+                <label><i class="fas fa-user"></i> 姓名</label>
+                <input type="text" id="authName" placeholder="请输入您的姓名">
+            </div>
+            <div class="auth-field">
+                <label><i class="fas fa-key"></i> 认证码</label>
+                <input type="text" id="authAccessCode" placeholder="请输入认证码" autocomplete="off">
+            </div>
+            <button class="auth-submit" id="authVisitorSubmit">验证身份</button>
+        </div>
+
+        <!-- 管理员登录（可切换） -->
+        <div class="auth-switch">
+            <span id="switchToAdmin">管理员登录 →</span>
+        </div>
+
+        <div id="adminForm" style="display:none;">
+            <p class="auth-desc">输入管理员口令登录</p>
+            <div class="auth-field">
+                <label><i class="fas fa-key"></i> 管理员口令</label>
+                <input type="password" id="authAdminPass" placeholder="请输入管理员口令">
+            </div>
+            <button class="auth-submit" id="authAdminSubmit">管理员登录</button>
+            <div class="auth-switch">
+                <span id="switchToVisitor">← 访客验证</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 用户状态栏 -->
+<div class="user-status-bar" id="userStatusBar" style="display:none;">
+    <div class="user-info">
+        <i class="fas fa-user-circle"></i>
+        <span id="userDisplayName"></span>
+    </div>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出</button>
+</div>

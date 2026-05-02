@@ -19,7 +19,7 @@ server:
 # 数据库配置
 database:
   # SQLite数据库文件路径（相对于backend目录）
-  path: "data/blog.db"
+  path: "data/dingymxy.db"
   # 是否在启动时自动创建表
   auto_create_tables: true
   # 是否插入示例数据（首次启动）
@@ -36,12 +36,14 @@ auth:
   # 算法
   algorithm: "HS256"
 
-# 管理员配置（首次启动时自动创建）
+# 管理员配置
 admin:
   username: "admin"
   # 生产环境请修改密码
   password: "admin123"
   email: "dym3411795482@qq.com"
+  # 管理员口令（登录时只需输入此口令）
+  passphrase: "admin123"
 
 # 博客配置
 blog:

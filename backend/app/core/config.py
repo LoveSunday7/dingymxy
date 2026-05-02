@@ -1,15 +1,16 @@
 """配置加载模块"""
 import os
+from typing import Any
+
 import yaml
 from pathlib import Path
-from typing import Any
 
 
 # 项目根目录（backend/）
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
-def load_config() -> dict:
+def load_config() -> dict[str, Any]:
     """加载配置文件，环境变量可覆盖"""
     config_path = os.environ.get("CONFIG_PATH", str(BASE_DIR / "config.yaml"))
     with open(config_path, "r", encoding="utf-8") as f:
@@ -29,5 +30,5 @@ def load_config() -> dict:
 config = load_config()
 
 
-def get_config() -> dict:
+def get_config() -> dict[str, Any]:
     return config

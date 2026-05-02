@@ -1,58 +1,56 @@
 """Pydantic数据模型"""
-from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 # ====== 认证相关 ======
 
 class AdminLoginRequest(BaseModel):
-    username: str
-    password: str
+    passphrase: str = Field(..., description="管理员口令")
 
 
 class UserVerifyRequest(BaseModel):
-    access_code: str = Field(..., description="管理员分配的访问码")
     name: str = Field(..., min_length=1, max_length=50, description="访客姓名")
-    phone: Optional[str] = Field(None, description="手机号")
-    email: Optional[str] = Field(None, description="邮箱")
+    access_code: str = Field(..., description="管理员分配的访问码")
 
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    user_info: dict
+    user_info: dict[str, Any]
 
 
 # ====== 用户/访客管理 ======
 
 class UserCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
-    phone: Optional[str] = None
-    email: Optional[str] = None
-    wechat: Optional[str] = None
-    qq: Optional[str] = None
+    phone: str | None = None
+    email: str | None = None
+    wechat: str | None = None
+    qq: str | None = None
 
 
 class UserUpdateRequest(BaseModel):
-    name: Optional[str] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
-    wechat: Optional[str] = None
-    qq: Optional[str] = None
-    is_verified: Optional[bool] = None
+    name: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    wechat: str | None = None
+    qq: str | None = None
+    is_verified: bool | None = None
+    reset_access_code: bool | None = None
 
 
 class UserResponse(BaseModel):
     id: int
     name: str
-    phone: Optional[str]
-    email: Optional[str]
-    wechat: Optional[str]
-    qq: Optional[str]
-    access_code: Optional[str]
+    phone: str | None
+    email: str | None
+    wechat: str | None
+    qq: str | None
+    access_code: str | None
     is_verified: bool
-    last_login_at: Optional[str]
+    last_login_at: str | None
     created_at: str
 
 
@@ -70,53 +68,57 @@ class PermissionResponse(BaseModel):
     created_at: str
 
 
+class PublicPageUpdate(BaseModel):
+    pages: dict[str, bool] = Field(..., description="页面ID到是否公开的映射，如 {\"home\": true, \"blog\": false}")
+
+
 # ====== 文章相关 ======
 
 class PostCreateRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
-    slug: Optional[str] = None
-    excerpt: Optional[str] = None
+    slug: str | None = None
+    excerpt: str | None = None
     content: str
-    category_id: Optional[int] = None
+    category_id: int | None = None
     is_published: bool = True
     is_featured: bool = False
     author_name: str = "黑色小猫"
-    tag_ids: List[int] = []
+    tag_ids: list[int] = []
 
 
 class PostUpdateRequest(BaseModel):
-    title: Optional[str] = None
-    slug: Optional[str] = None
-    excerpt: Optional[str] = None
-    content: Optional[str] = None
-    category_id: Optional[int] = None
-    is_published: Optional[bool] = None
-    is_featured: Optional[bool] = None
-    author_name: Optional[str] = None
-    tag_ids: Optional[List[int]] = None
+    title: str | None = None
+    slug: str | None = None
+    excerpt: str | None = None
+    content: str | None = None
+    category_id: int | None = None
+    is_published: bool | None = None
+    is_featured: bool | None = None
+    author_name: str | None = None
+    tag_ids: list[int] | None = None
 
 
 class PostResponse(BaseModel):
     id: int
     title: str
-    slug: Optional[str]
-    excerpt: Optional[str]
-    content: Optional[str]
-    category: Optional[dict]
-    tags: List[dict]
+    slug: str | None
+    excerpt: str | None
+    content: str | None
+    category: dict[str, Any] | None
+    tags: list[dict[str, Any]]
     is_published: bool
     is_featured: bool
     views: int
     likes: int
     author_name: str
-    published_at: Optional[str]
+    published_at: str | None
     created_at: str
     updated_at: str
     comments_count: int = 0
 
 
 class PostListResponse(BaseModel):
-    posts: List[PostResponse]
+    posts: list[PostResponse]
     total: int
     page: int
     per_page: int
@@ -128,7 +130,7 @@ class PostListResponse(BaseModel):
 class CategoryCreateRequest(BaseModel):
     name: str
     slug: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class TagCreateRequest(BaseModel):
@@ -140,7 +142,7 @@ class CategoryResponse(BaseModel):
     id: int
     name: str
     slug: str
-    description: Optional[str]
+    description: str | None
 
 
 class TagResponse(BaseModel):
@@ -153,19 +155,19 @@ class TagResponse(BaseModel):
 
 class CommentCreateRequest(BaseModel):
     author_name: str = Field(..., min_length=1, max_length=50)
-    author_email: Optional[str] = None
+    author_email: str | None = None
     content: str = Field(..., min_length=1, max_length=2000)
-    parent_id: Optional[int] = None
+    parent_id: int | None = None
 
 
 class CommentResponse(BaseModel):
     id: int
     post_id: int
     author_name: str
-    author_email: Optional[str]
+    author_email: str | None
     content: str
     likes: int
-    parent_id: Optional[int]
+    parent_id: int | None
     is_approved: bool
     created_at: str
 
@@ -174,14 +176,14 @@ class CommentResponse(BaseModel):
 
 class MessageCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
-    email: Optional[str] = None
+    email: str | None = None
     content: str = Field(..., min_length=1, max_length=2000)
 
 
 class MessageResponse(BaseModel):
     id: int
     name: str
-    email: Optional[str]
+    email: str | None
     content: str
     likes: int
     created_at: str
@@ -192,4 +194,4 @@ class MessageResponse(BaseModel):
 class ApiResponse(BaseModel):
     success: bool
     message: str
-    data: Optional[dict] = None
+    data: dict[str, Any] | None = None

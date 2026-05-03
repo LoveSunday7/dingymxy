@@ -148,7 +148,7 @@ function showAuthNotification(message, type) {
         background-color: ${type === 'success' ? '#4caf50' : '#f44336'};
         color: white; padding: 0.7rem 1.2rem;
         border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        z-index: 10002; font-size: 0.85rem;
+        z-index: 99999; font-size: 0.85rem;
         animation: authFadeIn 0.2s ease;
     `;
     document.body.appendChild(el);

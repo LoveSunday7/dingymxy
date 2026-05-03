@@ -166,4 +166,5 @@ function initRouter() {
 }
 
 window.initRouter = initRouter;
+window.switchPage = switchPage;
 window.refreshPageAccess = refreshPageAccess;

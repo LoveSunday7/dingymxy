@@ -105,6 +105,11 @@
                 
                 <div class="form-group">
                     <label for="messageContent"><i class="fas fa-comment"></i> 留言内容</label>
+                    <div id="replyBar" class="reply-bar" style="display:none;">
+                        <i class="fas fa-reply"></i>
+                        <span>回复 <strong id="replyToText"></strong></span>
+                        <button type="button" id="cancelReply" class="cancel-reply-btn"><i class="fas fa-times"></i></button>
+                    </div>
                     <textarea id="messageContent" placeholder="请写下您的留言..." rows="4"></textarea>
                 </div>
                 

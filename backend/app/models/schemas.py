@@ -38,6 +38,7 @@ class UserUpdateRequest(BaseModel):
     wechat: str | None = None
     qq: str | None = None
     is_verified: bool | None = None
+    access_code: str | None = None
     reset_access_code: bool | None = None
 
 
@@ -178,6 +179,8 @@ class MessageCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
     email: str | None = None
     content: str = Field(..., min_length=1, max_length=2000)
+    parent_id: int | None = None
+    reply_to_name: str | None = None
 
 
 class MessageResponse(BaseModel):

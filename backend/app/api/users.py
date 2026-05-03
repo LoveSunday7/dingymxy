@@ -238,7 +238,7 @@ async def update_user(user_id: int, req: UserUpdateRequest, _admin: dict[str, An
             updates.append("is_verified=?")
             params.append(int(req.is_verified))
 
-        # 重置认证码
+        # 重置或手动设置认证码
         new_access_code = None
         if req.reset_access_code:
             new_access_code = generate_access_code()
@@ -247,6 +247,14 @@ async def update_user(user_id: int, req: UserUpdateRequest, _admin: dict[str, An
                 if not await cursor.fetchone():
                     break
                 new_access_code = generate_access_code()
+            updates.append("access_code=?")
+            params.append(new_access_code)
+        elif req.access_code is not None:
+            # 手动设置认证码，检查唯一性
+            cursor = await db.execute("SELECT id FROM users WHERE access_code=? AND id!=?", (req.access_code, user_id))
+            if await cursor.fetchone():
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="该认证码已被其他用户使用")
+            new_access_code = req.access_code
             updates.append("access_code=?")
             params.append(new_access_code)
 

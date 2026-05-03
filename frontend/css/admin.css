@@ -346,6 +346,31 @@
     border: 1px solid rgba(255,255,255,0.1);
 }
 
+.access-code-input {
+    font-family: 'Courier New', monospace;
+    background: rgba(255,255,255,0.08);
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    color: var(--primary-color, #64b5f6);
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.15);
+    outline: none;
+    width: 90px;
+    transition: border-color 0.2s;
+}
+
+.access-code-input:focus {
+    border-color: var(--primary-color, #64b5f6);
+}
+
+.access-code-input::placeholder {
+    color: rgba(255,255,255,0.25);
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
 .user-card-code-label {
     font-size: 0.78rem;
     color: rgba(255,255,255,0.4);
@@ -368,6 +393,80 @@
     border-radius: 10px;
     font-size: 0.7rem;
     opacity: 0.8;
+}
+
+/* 用户卡片内嵌权限管理 */
+.user-card-perm-section {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.user-perm-header {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.user-perm-header i {
+    color: var(--primary-color, #64b5f6);
+    font-size: 0.72rem;
+}
+
+.user-perm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem 0.5rem;
+}
+
+.user-perm-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.55rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+}
+
+.user-perm-toggle:hover {
+    background: rgba(255,255,255,0.07);
+}
+
+.user-perm-label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+}
+
+.user-perm-label i {
+    color: var(--primary-color, #64b5f6);
+    font-size: 0.68rem;
+    width: 14px;
+    text-align: center;
+}
+
+.user-perm-toggle .toggle-switch {
+    width: 34px;
+    height: 18px;
+}
+
+.user-perm-toggle .toggle-slider:before {
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+}
+
+.user-perm-toggle .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(16px);
 }
 
 .badge {
@@ -484,44 +583,6 @@
     margin-top: 1rem;
 }
 
-/* 权限管理弹窗 */
-.perm-user-name {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.5);
-    margin: 0 0 0.8rem;
-}
-
-.perm-check-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-.perm-check-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.55rem 0.75rem;
-    background: rgba(255,255,255,0.04);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.06);
-}
-
-.perm-check-item label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #e0e0e0;
-    font-size: 0.88rem;
-    cursor: pointer;
-}
-
-.perm-check-item label i {
-    color: var(--primary-color, #64b5f6);
-    width: 18px;
-    text-align: center;
-}
-
 /* 公开页面 */
 .admin-hint {
     font-size: 0.82rem;
@@ -598,44 +659,6 @@
     transform: translateX(20px);
 }
 
-/* 复选框 */
-.perm-checkbox {
-    position: relative;
-    width: 20px; height: 20px;
-    flex-shrink: 0;
-}
-
-.perm-checkbox input {
-    opacity: 0; width: 0; height: 0;
-    position: absolute;
-}
-
-.perm-checkbox .checkmark {
-    position: absolute;
-    top: 0; left: 0;
-    width: 20px; height: 20px;
-    background: rgba(255,255,255,0.06);
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.perm-checkbox input:checked + .checkmark {
-    background: var(--primary-color, #64b5f6);
-    border-color: var(--primary-color, #64b5f6);
-}
-
-.perm-checkbox input:checked + .checkmark:after {
-    content: "";
-    position: absolute;
-    left: 6px; top: 2px;
-    width: 5px; height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
 /* 空状态 */
 .admin-empty {
     text-align: center;
@@ -665,6 +688,7 @@
     .admin-form-grid { grid-template-columns: 1fr; }
     .user-card-top { flex-direction: column; }
     .user-card-actions { margin-left: 0; margin-top: 0.4rem; }
+    .user-perm-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {

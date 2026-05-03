@@ -138,6 +138,12 @@ const api = {
         delete(id) {
             return api.delete(`/messages/${id}`);
         },
+        adminList(page = 1, perPage = 50) {
+            return api.get('/messages/admin/all', { page, per_page: perPage });
+        },
+        markRead(id) {
+            return api.put(`/messages/${id}/read`, {});
+        },
     },
 
     // ====== 用户管理（管理员） ======

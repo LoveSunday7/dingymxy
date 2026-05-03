@@ -13,29 +13,53 @@ let adminState = {
     usersTotal: 0,
     usersSearch: '',
     publicPages: [],
-    permUserId: null,
-    permUserName: '',
-    permCurrentPerms: [],
     panelLoaded: false,
+    msgPage: 1,
+    msgTotal: 0,
 };
 
 function initAdmin() {
-    if (!api.isAdmin()) return;
+    function updateLogoBehavior() {
+        const logo = document.querySelector('.logo');
+        if (!logo) return;
 
-    // 管理员：Logo点击打开管理面板
-    const logo = document.querySelector('.logo');
-    if (logo) {
-        // 保存原始行为
-        const originalClick = logo.onclick;
-        logo.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openAdminPanel();
-        });
-        // 改变视觉提示
-        logo.title = '管理面板';
-        logo.classList.add('admin-logo');
+        // 移除旧的事件：通过克隆节点替换
+        const newLogo = logo.cloneNode(true);
+        logo.parentNode.replaceChild(newLogo, logo);
+
+        // 清理视觉状态
+        newLogo.classList.remove('admin-logo');
+        newLogo.title = '';
+        newLogo.style.cursor = '';
+        newLogo.style.opacity = '';
+
+        if (api.isAdmin()) {
+            // 管理员：Logo点击打开管理面板
+            newLogo.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openAdminPanel();
+            });
+            newLogo.title = '管理面板';
+            newLogo.classList.add('admin-logo');
+        } else {
+            // 非管理员：Logo不可点击
+            newLogo.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            newLogo.style.cursor = 'default';
+            newLogo.style.opacity = '0.7';
+        }
     }
+
+    // 初始设置
+    updateLogoBehavior();
+
+    // 登录/登出时更新logo行为
+    window.addEventListener('auth-change', () => {
+        setTimeout(updateLogoBehavior, 100);
+    });
 }
 
 async function openAdminPanel() {
@@ -48,6 +72,7 @@ async function openAdminPanel() {
     document.getElementById('adminPanel').style.display = 'flex';
     loadStats();
     loadUsers();
+    loadAdminMessages();
     loadPublicPages();
 }
 
@@ -93,15 +118,6 @@ function bindAdminEvents() {
     });
     document.getElementById('confirmUserForm').addEventListener('click', submitUserForm);
 
-    // 权限弹窗
-    document.getElementById('cancelPerm').addEventListener('click', () => {
-        document.getElementById('permModal').style.display = 'none';
-    });
-    document.getElementById('permOverlay').addEventListener('click', () => {
-        document.getElementById('permModal').style.display = 'none';
-    });
-    document.getElementById('savePerm').addEventListener('click', savePermissions);
-
     // 公开页面保存
     document.getElementById('savePublicPagesBtn').addEventListener('click', savePublicPages);
 }
@@ -142,6 +158,10 @@ async function loadUsers() {
         container.querySelectorAll('[data-action]').forEach(btn => {
             btn.addEventListener('click', handleUserAction);
         });
+        // 绑定权限开关事件
+        container.querySelectorAll('.perm-toggle input').forEach(toggle => {
+            toggle.addEventListener('change', handlePermToggle);
+        });
     }
 
     renderPagination();
@@ -149,16 +169,26 @@ async function loadUsers() {
 
 function renderUserCard(u) {
     const pagePerms = (u.permissions || []).filter(p => p.resource_type === 'page');
-    const permTags = pagePerms.map(p => {
-        const pg = PAGE_LIST.find(x => x.id === p.resource_id);
-        return `<span class="perm-mini-tag"><i class="fas ${pg ? pg.icon : 'fa-file'}"></i>${pg ? pg.name : p.resource_id}</span>`;
-    }).join('');
+    const permMap = {};
+    pagePerms.forEach(p => { permMap[p.resource_id] = p.id; });
 
     const metaItems = [];
     if (u.phone) metaItems.push(`<span><i class="fas fa-phone"></i>${u.phone}</span>`);
     if (u.email) metaItems.push(`<span><i class="fas fa-envelope"></i>${u.email}</span>`);
     if (u.wechat) metaItems.push(`<span><i class="fab fa-weixin"></i>${u.wechat}</span>`);
     if (u.qq) metaItems.push(`<span><i class="fab fa-qq"></i>${u.qq}</span>`);
+
+    const permToggles = PAGE_LIST.map(page => {
+        const hasPerm = page.id in permMap;
+        return `
+            <div class="user-perm-toggle">
+                <span class="user-perm-label"><i class="fas ${page.icon}"></i>${page.name}</span>
+                <label class="toggle-switch perm-toggle" data-user-id="${u.id}" data-page-id="${page.id}" data-perm-id="${hasPerm ? permMap[page.id] : ''}">
+                    <input type="checkbox" ${hasPerm ? 'checked' : ''}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>`;
+    }).join('');
 
     return `
     <div class="user-card" data-user-id="${u.id}">
@@ -172,16 +202,21 @@ function renderUserCard(u) {
             </div>
             <div class="user-card-actions">
                 <button class="admin-btn sm" data-action="edit" data-id="${u.id}" title="编辑"><i class="fas fa-pen"></i></button>
-                <button class="admin-btn sm warning" data-action="perm" data-id="${u.id}" data-name="${u.name}" title="权限"><i class="fas fa-key"></i></button>
                 <button class="admin-btn sm danger" data-action="delete" data-id="${u.id}" data-name="${u.name}" title="删除"><i class="fas fa-trash"></i></button>
             </div>
         </div>
         <div class="user-card-code">
             <span class="user-card-code-label"><i class="fas fa-key"></i> 认证码:</span>
-            <span class="access-code">${u.access_code || '-'}</span>
-            <button class="admin-btn sm" data-action="reset-code" data-id="${u.id}" title="重新生成"><i class="fas fa-sync-alt"></i> 重置</button>
+            <input type="text" class="access-code-input" value="${u.access_code || ''}" data-user-id="${u.id}" placeholder="输入认证码" maxlength="20">
+            <button class="admin-btn sm" data-action="save-code" data-id="${u.id}" title="保存"><i class="fas fa-check"></i></button>
+            <button class="admin-btn sm" data-action="reset-code" data-id="${u.id}" title="随机重置"><i class="fas fa-sync-alt"></i></button>
         </div>
-        ${permTags ? `<div class="user-card-perms">${permTags}</div>` : ''}
+        <div class="user-card-perm-section">
+            <div class="user-perm-header">
+                <i class="fas fa-shield-alt"></i> 页面访问权限
+            </div>
+            <div class="user-perm-grid">${permToggles}</div>
+        </div>
     </div>`;
 }
 
@@ -193,8 +228,8 @@ function handleUserAction(e) {
 
     switch (action) {
         case 'edit': openUserForm(id); break;
-        case 'perm': openPermModal(id, name); break;
         case 'delete': confirmDeleteUser(id, name); break;
+        case 'save-code': saveAccessCode(id); break;
         case 'reset-code': resetAccessCode(id); break;
     }
 }
@@ -303,6 +338,23 @@ function confirmDeleteUser(id, name) {
     });
 }
 
+// ====== 保存/重置认证码 ======
+
+async function saveAccessCode(userId) {
+    const input = document.querySelector(`.access-code-input[data-user-id="${userId}"]`);
+    if (!input) return;
+    const code = input.value.trim();
+    if (!code) { showAuthNotification('认证码不能为空', 'error'); return; }
+
+    const result = await api.users.update(userId, { access_code: code });
+    if (result.success) {
+        showAuthNotification('认证码已保存', 'success');
+    } else {
+        showAuthNotification(result.message || '保存失败', 'error');
+        loadUsers();
+    }
+}
+
 // ====== 重置认证码 ======
 
 async function resetAccessCode(userId) {
@@ -316,60 +368,42 @@ async function resetAccessCode(userId) {
     }
 }
 
-// ====== 权限管理弹窗 ======
+// ====== 权限开关切换 ======
 
-async function openPermModal(userId, userName) {
-    adminState.permUserId = userId;
-    adminState.permUserName = userName;
+async function handlePermToggle(e) {
+    const checkbox = e.target;
+    const toggleLabel = checkbox.closest('.perm-toggle');
+    const userId = parseInt(toggleLabel.dataset.userId);
+    const pageId = toggleLabel.dataset.pageId;
+    const permId = toggleLabel.dataset.permId;
+    const isChecked = checkbox.checked;
 
-    document.getElementById('permUserName').textContent = `用户: ${userName}`;
-
-    const result = await api.users.getPermissions(userId);
-    adminState.permCurrentPerms = (result.permissions || []).filter(p => p.resource_type === 'page');
-
-    const container = document.getElementById('permCheckList');
-    container.innerHTML = PAGE_LIST.map(page => {
-        const hasPerm = adminState.permCurrentPerms.some(p => p.resource_id === page.id);
-        return `
-            <div class="perm-check-item">
-                <label for="perm_chk_${page.id}">
-                    <i class="fas ${page.icon}"></i>
-                    ${page.name}
-                </label>
-                <label class="perm-checkbox">
-                    <input type="checkbox" id="perm_chk_${page.id}" data-page="${page.id}" ${hasPerm ? 'checked' : ''}>
-                    <span class="checkmark"></span>
-                </label>
-            </div>`;
-    }).join('');
-
-    document.getElementById('permModal').style.display = 'flex';
-}
-
-async function savePermissions() {
-    const userId = adminState.permUserId;
-    if (!userId) return;
-
-    const checkedPages = [];
-    PAGE_LIST.forEach(page => {
-        const cb = document.getElementById(`perm_chk_${page.id}`);
-        if (cb && cb.checked) checkedPages.push(page.id);
-    });
-
-    const currentPages = adminState.permCurrentPerms.map(p => p.resource_id);
-    const toAdd = checkedPages.filter(p => !currentPages.includes(p));
-    const toDelete = adminState.permCurrentPerms.filter(p => !checkedPages.includes(p.resource_id));
-
-    for (const pageId of toAdd) {
-        await api.users.addPermission(userId, { user_id: userId, resource_type: 'page', resource_id: pageId });
+    if (isChecked) {
+        // 添加权限
+        const result = await api.users.addPermission(userId, { user_id: userId, resource_type: 'page', resource_id: pageId });
+        if (result.success) {
+            showAuthNotification(`已授权访问「${PAGE_LIST.find(p => p.id === pageId)?.name || pageId}」`, 'success');
+            // 更新 permId 以便后续删除
+            const permResult = await api.users.getPermissions(userId);
+            const newPerm = (permResult.permissions || []).find(p => p.resource_type === 'page' && p.resource_id === pageId);
+            if (newPerm) toggleLabel.dataset.permId = newPerm.id;
+        } else {
+            checkbox.checked = false;
+            showAuthNotification(result.message || '授权失败', 'error');
+        }
+    } else {
+        // 删除权限
+        if (permId) {
+            const result = await api.users.deletePermission(userId, parseInt(permId));
+            if (result.success) {
+                showAuthNotification(`已取消「${PAGE_LIST.find(p => p.id === pageId)?.name || pageId}」访问权限`, 'success');
+                toggleLabel.dataset.permId = '';
+            } else {
+                checkbox.checked = true;
+                showAuthNotification(result.message || '取消权限失败', 'error');
+            }
+        }
     }
-    for (const perm of toDelete) {
-        await api.users.deletePermission(userId, perm.id);
-    }
-
-    showAuthNotification('权限已保存', 'success');
-    document.getElementById('permModal').style.display = 'none';
-    loadUsers();
 }
 
 // ====== 公开页面管理 ======
@@ -409,6 +443,107 @@ async function savePublicPages() {
     } else {
         showAuthNotification(result.message || '保存失败', 'error');
     }
+}
+
+// ====== 留言管理 ======
+
+async function loadAdminMessages() {
+    const result = await api.messages.adminList(adminState.msgPage, 15);
+    if (!result.messages) return;
+
+    adminState.msgTotal = result.total;
+    const container = document.getElementById('adminMessagesList');
+
+    if (result.messages.length === 0) {
+        container.innerHTML = '<div class="admin-empty"><i class="fas fa-comment-slash"></i>暂无留言</div>';
+    } else {
+        container.innerHTML = result.messages.map(m => renderAdminMsgCard(m)).join('');
+        container.querySelectorAll('[data-msg-action]').forEach(btn => {
+            btn.addEventListener('click', handleMsgAction);
+        });
+    }
+
+    renderMsgPagination();
+}
+
+function renderAdminMsgCard(m) {
+    const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('zh-CN') : '';
+    const unreadBadge = !m.is_read ? '<span class="badge badge-no" style="background:#ff9800;color:white;">未读</span>' : '';
+    const replyBadge = m.parent_id ? `<span class="perm-mini-tag" style="background:#ff9800;opacity:1;"><i class="fas fa-reply"></i>回复</span>` : '';
+    const replyInfo = m.reply_to_name ? `<span style="color:var(--primary-color);font-size:0.75rem;">@${m.reply_to_name}</span>` : '';
+
+    return `
+    <div class="user-card" style="padding:0.7rem 1rem;">
+        <div class="user-card-top" style="margin-bottom:0.3rem;">
+            <div class="user-card-info">
+                <div class="user-card-name" style="font-size:0.85rem;">
+                    ${m.name} ${unreadBadge} ${replyBadge}
+                </div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);">${dateStr} ${m.email ? '· ' + m.email : ''}</div>
+            </div>
+            <div class="user-card-actions">
+                ${!m.is_read ? `<button class="admin-btn sm" data-msg-action="read" data-id="${m.id}" title="标为已读"><i class="fas fa-check"></i></button>` : ''}
+                <button class="admin-btn sm danger" data-msg-action="delete" data-id="${m.id}" title="删除"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        <div style="font-size:0.82rem;color:rgba(255,255,255,0.75);line-height:1.5;">${replyInfo}${escapeAdminHtml(m.content)}</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:0.3rem;"><i class="far fa-thumbs-up"></i> ${m.likes}</div>
+    </div>`;
+}
+
+function escapeAdminHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\n/g, '<br>');
+}
+
+async function handleMsgAction(e) {
+    const btn = e.currentTarget;
+    const action = btn.dataset.msgAction;
+    const id = parseInt(btn.dataset.id);
+
+    if (action === 'delete') {
+        if (!confirm('确定删除该留言？')) return;
+        const result = await api.messages.delete(id);
+        if (result.success) {
+            showAuthNotification('留言已删除', 'success');
+            loadAdminMessages();
+            loadStats();
+        } else {
+            showAuthNotification(result.message || '删除失败', 'error');
+        }
+    } else if (action === 'read') {
+        const result = await api.messages.markRead(id);
+        if (result.success) {
+            loadAdminMessages();
+        }
+    }
+}
+
+function renderMsgPagination() {
+    const container = document.getElementById('messagesPagination');
+    const totalPages = Math.ceil(adminState.msgTotal / 15);
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+    let html = `<button class="admin-page-btn" data-page="${adminState.msgPage - 1}" ${adminState.msgPage <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+    const start = Math.max(1, adminState.msgPage - 2);
+    const end = Math.min(totalPages, adminState.msgPage + 2);
+    for (let i = start; i <= end; i++) {
+        html += `<button class="admin-page-btn ${i === adminState.msgPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+    }
+    html += `<button class="admin-page-btn" data-page="${adminState.msgPage + 1}" ${adminState.msgPage >= totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+    container.innerHTML = html;
+    container.querySelectorAll('.admin-page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = parseInt(btn.dataset.page);
+            if (page >= 1 && page <= totalPages) {
+                adminState.msgPage = page;
+                loadAdminMessages();
+            }
+        });
+    });
 }
 
 window.initAdmin = initAdmin;

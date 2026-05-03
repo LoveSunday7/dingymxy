@@ -35,8 +35,31 @@ async def init_db():
     try:
         await db.executescript(SCHEMA_SQL)
         await db.commit()
+        # 迁移：为旧表添加新列
+        await _migrate(db)
     finally:
         await db.close()
+
+
+async def _migrate(db: aiosqlite.Connection):
+    """数据库迁移 - 为已存在的表添加新列"""
+    # messages 表添加 parent_id 和 reply_to_name
+    try:
+        await db.execute("ALTER TABLE messages ADD COLUMN parent_id INTEGER REFERENCES messages(id) ON DELETE CASCADE")
+        await db.commit()
+    except Exception:
+        pass  # 列已存在
+    try:
+        await db.execute("ALTER TABLE messages ADD COLUMN reply_to_name TEXT")
+        await db.commit()
+    except Exception:
+        pass  # 列已存在
+    # 创建索引（如果不存在）
+    try:
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_messages_parent ON messages(parent_id)")
+        await db.commit()
+    except Exception:
+        pass
 
 
 SCHEMA_SQL = """
@@ -146,7 +169,10 @@ CREATE TABLE IF NOT EXISTS messages (
     content TEXT NOT NULL,
     likes INTEGER DEFAULT 0,
     is_read INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    parent_id INTEGER,
+    reply_to_name TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES messages(id) ON DELETE CASCADE
 );
 
 -- 公开页面表（无需登录即可访问的页面）
@@ -165,5 +191,6 @@ CREATE INDEX IF NOT EXISTS idx_permissions_resource ON permissions(resource_type
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id, is_approved);
 CREATE INDEX IF NOT EXISTS idx_users_access_code ON users(access_code);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_parent ON messages(parent_id);
 CREATE INDEX IF NOT EXISTS idx_public_pages_page ON public_pages(page_id);
 """

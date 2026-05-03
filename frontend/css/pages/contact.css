@@ -156,6 +156,122 @@ textarea {
     border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
 }
 
+/* 回复提示栏 */
+.reply-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.08);
+    border: 1px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.15);
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+.reply-bar i.fa-reply {
+    color: var(--primary-color);
+}
+
+.reply-bar strong {
+    color: var(--primary-color);
+}
+
+.cancel-reply-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.cancel-reply-btn:hover {
+    color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+}
+
+.reply-bar + textarea {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* 回复列表 */
+.message-replies {
+    margin-top: 0.75rem;
+    margin-left: 2rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(var(--primary-color-rgb, 74, 144, 226), 0.15);
+}
+
+.reply-item {
+    padding: 0.75rem !important;
+    background: rgba(var(--primary-color-rgb, 74, 144, 226), 0.03);
+    border-radius: 0.5rem !important;
+    margin-bottom: 0.5rem;
+    border-bottom: none !important;
+}
+
+.reply-item:last-child {
+    margin-bottom: 0;
+}
+
+.reply-badge {
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-right: 0.3rem;
+}
+
+.message-avatar.small {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+}
+
+/* 回复按钮 */
+.reply-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.reply-btn:hover {
+    color: var(--secondary-color);
+    background-color: rgba(var(--secondary-color-rgb, 245, 166, 35), 0.1);
+}
+
+/* 删除按钮 */
+.delete-btn {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.delete-btn:hover {
+    color: #ff4444;
+    background-color: rgba(255, 68, 68, 0.1);
+}
+
 .empty-message {
     text-align: center;
     padding: 3rem 1rem;
@@ -212,6 +328,26 @@ textarea {
     justify-content: center;
     color: white;
     font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* 管理员标识 */
+.msg-admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.4rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+}
+
+.msg-admin-badge i {
+    font-size: 0.6rem;
 }
 
 .message-info h5 {
@@ -242,7 +378,7 @@ textarea {
     margin-top: 0.75rem;
 }
 
-.like-btn, .reply-btn, .delete-btn {
+.like-btn {
     background: none;
     border: none;
     color: #666;
@@ -259,16 +395,6 @@ textarea {
 .like-btn:hover {
     color: var(--primary-color);
     background-color: rgba(var(--primary-color-rgb, 74, 144, 226), 0.1);
-}
-
-.reply-btn:hover {
-    color: var(--secondary-color);
-    background-color: rgba(var(--secondary-color-rgb, 245, 166, 35), 0.1);
-}
-
-.delete-btn:hover {
-    color: #ff4444;
-    background-color: rgba(255, 68, 68, 0.1);
 }
 
 /* 响应式设计 */

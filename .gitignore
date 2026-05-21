@@ -25,3 +25,5 @@ frontend/config.local.js
 # OS
 .DS_Store
 Thumbs.db
+
+.pids/

@@ -66,12 +66,20 @@ function updateAllAvatars(url) {
 // 管理员：启用头像编辑
 function setupAvatarEdit() {
     const wrapper = document.querySelector('.avatar-wrapper');
-    if (!wrapper) return;
+    if (!wrapper) {
+        console.warn('avatar-wrapper not found');
+        return;
+    }
 
     wrapper.classList.add('show-edit');
 
-    // 点击头像选择文件
-    wrapper.onclick = function () {
+    // 移除旧事件，避免重复绑定
+    const oldHandler = wrapper._avatarClickHandler;
+    if (oldHandler) {
+        wrapper.removeEventListener('click', oldHandler);
+    }
+
+    const clickHandler = function () {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
@@ -96,6 +104,9 @@ function setupAvatarEdit() {
         };
         input.click();
     };
+
+    wrapper._avatarClickHandler = clickHandler;
+    wrapper.addEventListener('click', clickHandler);
 }
 
 // 非管理员：移除编辑功能
@@ -103,7 +114,11 @@ function removeAvatarEdit() {
     const wrapper = document.querySelector('.avatar-wrapper');
     if (wrapper) {
         wrapper.classList.remove('show-edit');
-        wrapper.onclick = null;
+        const handler = wrapper._avatarClickHandler;
+        if (handler) {
+            wrapper.removeEventListener('click', handler);
+            delete wrapper._avatarClickHandler;
+        }
     }
 }
 

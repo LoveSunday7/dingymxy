@@ -45,6 +45,56 @@ check_command() {
     fi
 }
 
+# 获取占用指定端口的PID列表（兼容 lsof / fuser / ss）
+port_pids() {
+    local port=$1
+    local pids=""
+
+    # 优先用 lsof
+    if command -v lsof &> /dev/null; then
+        pids=$(lsof -t -i ":$port" 2>/dev/null || true)
+    fi
+
+    # lsof 没结果则用 fuser
+    if [ -z "$pids" ] && command -v fuser &> /dev/null; then
+        pids=$(fuser "$port/tcp" 2>/dev/null | tr -s ' ' '\n' | grep -v '^$' || true)
+    fi
+
+    # 都没有则用 ss
+    if [ -z "$pids" ] && command -v ss &> /dev/null; then
+        pids=$(ss -tlnp "sport = :$port" 2>/dev/null | grep -oP 'pid=\K[0-9]+' || true)
+    fi
+
+    echo "$pids"
+}
+
+# 强制杀死占用端口的进程
+kill_port() {
+    local port=$1
+    local pids=$(port_pids "$port")
+    if [ -n "$pids" ]; then
+        echo "$pids" | tr '\n' ' ' | xargs kill -9 2>/dev/null
+        return 0
+    fi
+    return 1
+}
+
+# 等待端口彻底释放
+wait_port_free() {
+    local port=$1
+    local max_wait=${2:-10}
+    local waited=0
+    while [ $waited -lt $max_wait ]; do
+        local pids=$(port_pids "$port")
+        if [ -z "$pids" ]; then
+            return 0
+        fi
+        sleep 1
+        waited=$((waited + 1))
+    done
+    return 1
+}
+
 # 等待HTTP服务就绪
 wait_for_http() {
     local port=$1
@@ -82,12 +132,15 @@ install_deps() {
 }
 
 start_backend() {
-    # 先清理残留进程
-    local old_pids=$(lsof -t -i ":$BACKEND_PORT" 2>/dev/null || true)
-    if [ -n "$old_pids" ]; then
-        log_warn "端口 $BACKEND_PORT 被占用，尝试清理..."
-        echo "$old_pids" | xargs kill -9 2>/dev/null
-        sleep 1
+    # 清理端口占用
+    local pids=$(port_pids "$BACKEND_PORT")
+    if [ -n "$pids" ]; then
+        log_warn "端口 $BACKEND_PORT 被占用，强制清理..."
+        kill_port "$BACKEND_PORT"
+        if ! wait_port_free "$BACKEND_PORT" 5; then
+            log_error "端口 $BACKEND_PORT 无法释放"
+            exit 1
+        fi
     fi
 
     log_info "启动后端服务 (端口: $BACKEND_PORT)..."
@@ -102,18 +155,21 @@ start_backend() {
         echo -e "       ${BLUE}API文档:${NC} http://localhost:$BACKEND_PORT/docs"
     else
         log_error "后端启动失败，查看日志: $BACKEND_DIR/data/backend.log"
-        cat "$BACKEND_DIR/data/backend.log" | tail -10
+        tail -15 "$BACKEND_DIR/data/backend.log" 2>/dev/null
         exit 1
     fi
 }
 
 start_frontend() {
-    # 先清理残留进程
-    local old_pids=$(lsof -t -i ":$FRONTEND_PORT" 2>/dev/null || true)
-    if [ -n "$old_pids" ]; then
-        log_warn "端口 $FRONTEND_PORT 被占用，尝试清理..."
-        echo "$old_pids" | xargs kill -9 2>/dev/null
-        sleep 1
+    # 清理端口占用
+    local pids=$(port_pids "$FRONTEND_PORT")
+    if [ -n "$pids" ]; then
+        log_warn "端口 $FRONTEND_PORT 被占用，强制清理..."
+        kill_port "$FRONTEND_PORT"
+        if ! wait_port_free "$FRONTEND_PORT" 5; then
+            log_error "端口 $FRONTEND_PORT 无法释放"
+            exit 1
+        fi
     fi
 
     log_info "启动前端服务 (端口: $FRONTEND_PORT)..."
@@ -123,13 +179,30 @@ start_frontend() {
     echo "$pid" > "$PID_DIR/frontend.pid"
     cd "$PROJECT_DIR"
 
-    sleep 1
+    # 等待前端服务就绪（检查进程存活 + 端口可连）
+    local waited=0
+    while [ $waited -lt 10 ]; do
+        if ! kill -0 "$pid" 2>/dev/null; then
+            log_error "前端启动失败"
+            tail -15 "$PID_DIR/frontend.log" 2>/dev/null
+            exit 1
+        fi
+        if curl -sf "http://localhost:$FRONTEND_PORT/" > /dev/null 2>&1; then
+            log_info "前端服务已启动 (PID: $pid)"
+            echo -e "       ${BLUE}访问地址:${NC} http://localhost:$FRONTEND_PORT"
+            return 0
+        fi
+        sleep 1
+        waited=$((waited + 1))
+    done
+
+    # 超时但进程还活着，也算成功
     if kill -0 "$pid" 2>/dev/null; then
-        log_info "前端服务已启动 (PID: $pid)"
+        log_warn "前端服务启动较慢，但进程运行中 (PID: $pid)"
         echo -e "       ${BLUE}访问地址:${NC} http://localhost:$FRONTEND_PORT"
     else
         log_error "前端启动失败"
-        cat "$PID_DIR/frontend.log" | tail -10
+        tail -15 "$PID_DIR/frontend.log" 2>/dev/null
         exit 1
     fi
 }
@@ -137,11 +210,12 @@ start_frontend() {
 stop_services() {
     log_info "停止所有服务..."
 
+    # 1. 先通过 PID 文件停止
     for svc in backend frontend; do
         if [ -f "$PID_DIR/$svc.pid" ]; then
             local pid=$(cat "$PID_DIR/$svc.pid")
             if kill -0 "$pid" 2>/dev/null; then
-                kill "$pid" 2>/dev/null
+                kill -9 "$pid" 2>/dev/null
                 log_info "$svc 服务已停止 (PID: $pid)"
             else
                 log_warn "$svc 进程不存在 (PID: $pid)"
@@ -150,12 +224,19 @@ stop_services() {
         fi
     done
 
-    # 兜底：按端口杀进程
+    # 2. 兜底：强制杀掉端口上的所有进程
     for port in $BACKEND_PORT $FRONTEND_PORT; do
-        local pids=$(lsof -t -i ":$port" 2>/dev/null || true)
+        local pids=$(port_pids "$port")
         if [ -n "$pids" ]; then
-            echo "$pids" | xargs kill 2>/dev/null
-            log_info "已清理端口 $port"
+            echo "$pids" | tr '\n' ' ' | xargs kill -9 2>/dev/null
+            log_info "已强制清理端口 $port 上的残留进程"
+        fi
+    done
+
+    # 3. 等待端口彻底释放
+    for port in $BACKEND_PORT $FRONTEND_PORT; do
+        if ! wait_port_free "$port" 5; then
+            log_warn "端口 $port 未能完全释放，后续启动可能会受影响"
         fi
     done
 
@@ -165,8 +246,11 @@ stop_services() {
 show_status() {
     echo -e "${CYAN}服务状态:${NC}"
     for svc in backend frontend; do
-        local port_var="${svc}_PORT"
-        local port=${!port_var}
+        local port
+        case $svc in
+            backend)  port=$BACKEND_PORT ;;
+            frontend) port=$FRONTEND_PORT ;;
+        esac
         if [ -f "$PID_DIR/$svc.pid" ]; then
             local pid=$(cat "$PID_DIR/$svc.pid")
             if kill -0 "$pid" 2>/dev/null; then
@@ -175,7 +259,13 @@ show_status() {
                 echo -e "  $svc: ${RED}已停止${NC} (PID文件过期)"
             fi
         else
-            echo -e "  $svc: ${YELLOW}未启动${NC}"
+            # 检查端口是否有进程在监听
+            local pids=$(port_pids "$port")
+            if [ -n "$pids" ]; then
+                echo -e "  $svc: ${YELLOW}端口被占用${NC} (端口: $port, PID: $(echo $pids | tr '\n' ' '))"
+            else
+                echo -e "  $svc: ${YELLOW}未启动${NC}"
+            fi
         fi
     done
 }
@@ -269,7 +359,6 @@ case $COMMAND in
         ;;
     restart)
         stop_services
-        sleep 2
         print_banner
         setup_dirs
         setup_venv

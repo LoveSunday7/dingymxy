@@ -191,7 +191,56 @@ const api = {
         },
     },
 
+    // 文件上传方法（FormData）
+    async uploadFile(url, file) {
+        const token = localStorage.getItem(APP_CONFIG.tokenKey);
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${APP_CONFIG.apiBaseUrl}${url}`, {
+                method: 'POST',
+                headers,
+                body: formData,
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem(APP_CONFIG.tokenKey);
+                localStorage.removeItem(APP_CONFIG.userInfoKey);
+                return { success: false, message: '登录已过期，请重新验证' };
+            }
+
+            const data = await response.json();
+            if (!response.ok) {
+                return { success: false, message: data.detail || '上传失败' };
+            }
+            return data;
+        } catch (error) {
+            console.error('文件上传错误:', error);
+            return { success: false, message: '网络连接失败，请检查后端服务是否启动' };
+        }
+    },
+
+    // ====== 头像 ======
+    avatar: {
+        upload(file) {
+            return api.uploadFile('/users/avatar', file);
+        },
+        getUrl() {
+            return api.get('/users/avatar');
+        },
+    },
+
     // ====== 工具 ======
+    // 健康检查
+    health() {
+        return api.get('/health');
+    },
     isLoggedIn() {
         return !!localStorage.getItem(APP_CONFIG.tokenKey);
     },

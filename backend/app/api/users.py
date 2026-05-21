@@ -1,9 +1,11 @@
 """用户管理相关API（管理员）"""
+import glob
+import os
 import secrets
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 
 from ..core.auth import (
     can_access_page,
@@ -12,6 +14,7 @@ from ..core.auth import (
     get_all_public_pages,
     get_user_permissions,
 )
+from ..core.config import BASE_DIR
 from ..core.database import get_db
 from ..models.schemas import PermissionCreateRequest, PublicPageUpdate, UserCreateRequest, UserUpdateRequest
 
@@ -283,6 +286,50 @@ async def delete_user(user_id: int, _admin: dict[str, Any] = Depends(get_current
         return {"success": True, "message": "用户已删除"}
     finally:
         await db.close()
+
+
+# ====== 头像管理 ======
+
+AVATAR_DIR = BASE_DIR / "data" / "uploads" / "avatars"
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+
+
+@router.post("/avatar", summary="上传头像（管理员）")
+async def upload_avatar(
+    file: UploadFile = File(...),
+    _admin: dict[str, Any] = Depends(get_current_admin),
+):
+    """管理员上传新头像，自动替换旧头像"""
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="仅支持 JPG/PNG/GIF/WebP 格式图片")
+
+    AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+
+    # 删除旧头像文件
+    for old_file in glob.glob(str(AVATAR_DIR / "avatar.*")):
+        os.remove(old_file)
+
+    # 保留原始扩展名
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "jpg"
+    if ext not in ("jpg", "jpeg", "png", "gif", "webp"):
+        ext = "jpg"
+    filename = f"avatar.{ext}"
+
+    file_path = AVATAR_DIR / filename
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    return {"success": True, "url": f"/uploads/avatars/{filename}"}
+
+
+@router.get("/avatar", summary="获取当前头像地址")
+async def get_avatar():
+    """获取当前头像URL，无需认证"""
+    avatar_files = sorted(AVATAR_DIR.glob("avatar.*"))
+    if avatar_files:
+        return {"url": f"/uploads/avatars/{avatar_files[0].name}"}
+    return {"url": None}
 
 
 # ====== 权限管理 ======

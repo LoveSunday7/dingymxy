@@ -1,5 +1,6 @@
 """FastAPI应用入口"""
 import logging
+import time as time_module
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,9 @@ from .core.config import get_config, BASE_DIR
 from .core.database import init_db, get_db
 from .core.auth import hash_password
 from .api import auth, blog, users, messages
+
+# 服务器启动时间（模块级别）
+SERVER_START_TIME = time_module.time()
 
 
 @asynccontextmanager
@@ -177,6 +181,22 @@ def create_app() -> FastAPI:
     app.include_router(blog.router, prefix="/api")
     app.include_router(users.router, prefix="/api")
     app.include_router(messages.router, prefix="/api")
+
+    # 健康检查
+    @app.get("/api/health", summary="服务器健康检查")
+    async def health_check():
+        uptime_seconds = int(time_module.time() - SERVER_START_TIME)
+        days, remainder = divmod(uptime_seconds, 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        uptime_str = f"{days}天{hours}时{minutes}分{seconds}秒"
+        return {
+            "status": "ok",
+            "server_time": datetime.now(timezone.utc).isoformat(),
+            "started_at": datetime.fromtimestamp(SERVER_START_TIME, tz=timezone.utc).isoformat(),
+            "uptime": uptime_str,
+            "uptime_seconds": uptime_seconds,
+        }
 
     # 静态文件（上传目录）
     upload_dir = BASE_DIR / cfg.get("upload", {}).get("upload_dir", "data/uploads")

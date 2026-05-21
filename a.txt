@@ -1,0 +1,108 @@
+.
+├── a.txt
+├── backend
+│   ├── app
+│   │   ├── api
+│   │   │   ├── auth.py
+│   │   │   ├── blog.py
+│   │   │   ├── __init__.py
+│   │   │   ├── messages.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── auth.cpython-313.pyc
+│   │   │   │   ├── blog.cpython-313.pyc
+│   │   │   │   ├── content.cpython-313.pyc
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   ├── messages.cpython-313.pyc
+│   │   │   │   └── users.cpython-313.pyc
+│   │   │   └── users.py
+│   │   ├── core
+│   │   │   ├── auth.py
+│   │   │   ├── config.py
+│   │   │   ├── database.py
+│   │   │   ├── __init__.py
+│   │   │   └── __pycache__
+│   │   │       ├── auth.cpython-313.pyc
+│   │   │       ├── config.cpython-313.pyc
+│   │   │       ├── database.cpython-313.pyc
+│   │   │       └── __init__.cpython-313.pyc
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── schemas.cpython-313.pyc
+│   │   │   └── schemas.py
+│   │   └── __pycache__
+│   │       ├── __init__.cpython-313.pyc
+│   │       └── main.cpython-313.pyc
+│   ├── config.yaml
+│   ├── data
+│   │   ├── backend.log
+│   │   ├── dingymxy.db
+│   │   └── uploads
+│   ├── frontend
+│   │   └── images
+│   ├── main.py
+│   ├── __pycache__
+│   │   └── main.cpython-313.pyc
+│   ├── requirements.txt
+│
+├── deploy.yaml
+├── frontend
+│   ├── config.example.js
+│   ├── css
+│   │   ├── admin.css
+│   │   ├── auth.css
+│   │   ├── background-panel.css
+│   │   ├── base.css
+│   │   ├── nav.css
+│   │   └── pages
+│   │       ├── blog.css
+│   │       ├── contact.css
+│   │       ├── experience.css
+│   │       ├── friends.css
+│   │       ├── home.css
+│   │       └── resume.css
+│   ├── DEPLOY.md
+│   ├── images
+│   │   ├── flowers.avif
+│   │   ├── girlhead.jpg
+│   │   ├── mountain.avif
+│   │   └── star.avif
+│   ├── index.html
+│   ├── js
+│   │   ├── admin.js
+│   │   ├── api.js
+│   │   ├── auth.js
+│   │   ├── background.js
+│   │   ├── mobile-nav.js
+│   │   ├── pages
+│   │   │   ├── blog.js
+│   │   │   ├── contact.js
+│   │   │   ├── experience.js
+│   │   │   ├── friends.js
+│   │   │   ├── home.js
+│   │   │   └── resume.js
+│   │   ├── router.js
+│   │   ├── theme.js
+│   │   └── utils.js
+│   └── modules
+│       ├── admin-panel.html
+│       ├── auth-modal.html
+│       ├── background-panel.html
+│       ├── footer.html
+│       ├── nav.html
+│       └── pages
+│           ├── blog.html
+│           ├── contact.html
+│           ├── experience.html
+│           ├── friends.html
+│           ├── home.html
+│           └── resume.html
+├── pyrightconfig.json
+├── README.md
+├── start.sh
+└── Task.md
+
+310 directories, 2372 files

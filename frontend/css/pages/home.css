@@ -7,6 +7,41 @@
     padding: 2rem 0;
 }
 
+/* 头像容器 */
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+}
+
+.avatar-wrapper .avatar-edit-hint {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background: var(--primary-color);
+    color: #fff;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: opacity 0.3s;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.avatar-wrapper.show-edit .avatar-edit-hint {
+    display: flex;
+}
+
+.avatar-wrapper.show-edit:hover .avatar-edit-hint {
+    opacity: 0.9;
+}
+
 .profile-img {
     width: min(12.5rem, 40vw);
     height: min(12.5rem, 40vw);
@@ -14,13 +49,16 @@
     object-fit: cover;
     border: 0.3rem solid var(--primary-color);
     box-shadow: 0 0.625rem 1.875rem var(--shadow);
-    margin-bottom: 2rem;
     transition: var(--transition);
 }
 
 .profile-img:hover {
     transform: scale(1.05);
     box-shadow: 0 0.9375rem 2.5rem var(--shadow);
+}
+
+.avatar-wrapper.show-edit .profile-img {
+    cursor: pointer;
 }
 
 .hero h1 {

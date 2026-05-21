@@ -16,6 +16,7 @@ let adminState = {
     panelLoaded: false,
     msgPage: 1,
     msgTotal: 0,
+    sysTimer: null,
 };
 
 function initAdmin() {
@@ -70,19 +71,23 @@ async function openAdminPanel() {
         adminState.panelLoaded = true;
     }
     document.getElementById('adminPanel').style.display = 'flex';
-    loadStats();
+    document.body.classList.add('panel-open');
     loadUsers();
     loadAdminMessages();
     loadPublicPages();
+    loadSystemStatus();
+    // 自动刷新系统状态
+    clearInterval(adminState.sysTimer);
+    adminState.sysTimer = setInterval(loadSystemStatus, 30000);
 }
 
 function bindAdminEvents() {
-    // 关闭
+    // 关闭（仅关闭按钮，全屏模式点击空白不关闭）
     document.getElementById('adminClose').addEventListener('click', () => {
         document.getElementById('adminPanel').style.display = 'none';
-    });
-    document.getElementById('adminOverlay').addEventListener('click', () => {
-        document.getElementById('adminPanel').style.display = 'none';
+        document.body.classList.remove('panel-open');
+        clearInterval(adminState.sysTimer);
+        adminState.sysTimer = null;
     });
 
     // Tab 切换
@@ -92,6 +97,8 @@ function bindAdminEvents() {
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            // 切换到系统状态tab时刷新
+            if (tab.dataset.tab === 'system') loadSystemStatus();
         });
     });
 
@@ -122,19 +129,7 @@ function bindAdminEvents() {
     document.getElementById('savePublicPagesBtn').addEventListener('click', savePublicPages);
 }
 
-// ====== 统计数据 ======
-
-async function loadStats() {
-    const result = await api.users.stats();
-    if (!result.users) return;
-
-    document.getElementById('statUsers').textContent = result.users.total;
-    document.getElementById('statPosts').textContent = result.posts.total;
-    document.getElementById('statViews').textContent = formatNum(result.posts.views);
-    document.getElementById('statLikes').textContent = formatNum(result.posts.likes);
-    document.getElementById('statComments').textContent = result.comments;
-    document.getElementById('statMessages').textContent = result.messages;
-}
+// ====== 工具 ======
 
 function formatNum(n) {
     if (n >= 10000) return (n / 10000).toFixed(1) + 'w';
@@ -145,7 +140,7 @@ function formatNum(n) {
 // ====== 用户列表 ======
 
 async function loadUsers() {
-    const result = await api.users.list(adminState.usersPage, 10, adminState.usersSearch || undefined);
+    const result = await api.users.list(adminState.usersPage, 6, adminState.usersSearch || undefined);
     if (!result.users) return;
 
     adminState.usersTotal = result.total;
@@ -238,7 +233,7 @@ function handleUserAction(e) {
 
 function renderPagination() {
     const container = document.getElementById('usersPagination');
-    const totalPages = Math.ceil(adminState.usersTotal / 10);
+    const totalPages = Math.ceil(adminState.usersTotal / 6);
     if (totalPages <= 1) { container.innerHTML = ''; return; }
 
     let html = `<button class="admin-page-btn" data-page="${adminState.usersPage - 1}" ${adminState.usersPage <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
@@ -448,10 +443,12 @@ async function savePublicPages() {
 // ====== 留言管理 ======
 
 async function loadAdminMessages() {
-    const result = await api.messages.adminList(adminState.msgPage, 15);
+    const result = await api.messages.adminList(adminState.msgPage, 6);
     if (!result.messages) return;
 
     adminState.msgTotal = result.total;
+    const totalBadge = document.getElementById('msgTotalBadge');
+    if (totalBadge) totalBadge.textContent = result.total;
     const container = document.getElementById('adminMessagesList');
 
     if (result.messages.length === 0) {
@@ -523,7 +520,7 @@ async function handleMsgAction(e) {
 
 function renderMsgPagination() {
     const container = document.getElementById('messagesPagination');
-    const totalPages = Math.ceil(adminState.msgTotal / 15);
+    const totalPages = Math.ceil(adminState.msgTotal / 6);
     if (totalPages <= 1) { container.innerHTML = ''; return; }
 
     let html = `<button class="admin-page-btn" data-page="${adminState.msgPage - 1}" ${adminState.msgPage <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
@@ -544,6 +541,61 @@ function renderMsgPagination() {
             }
         });
     });
+}
+
+// ====== 系统状态 ======
+
+async function loadSystemStatus() {
+    const startTime = performance.now();
+    const result = await api.health();
+    const latency = performance.now() - startTime;
+
+    const statusEl = document.getElementById('sysStatus');
+    const latencyEl = document.getElementById('sysLatency');
+    const uptimeEl = document.getElementById('sysUptime');
+    const timeEl = document.getElementById('sysTime');
+    if (!statusEl) return;
+
+    if (result && result.status === 'ok') {
+        statusEl.textContent = '● 在线';
+        statusEl.className = 'value online';
+        latencyEl.textContent = latency < 1 ? '<1 ms' : `${Math.round(latency)} ms`;
+        if (result.uptime) uptimeEl.textContent = result.uptime;
+        if (result.server_time) {
+            const t = new Date(result.server_time);
+            timeEl.textContent = t.toLocaleString('zh-CN', { hour12: false });
+        }
+    } else {
+        statusEl.textContent = '○ 离线';
+        statusEl.className = 'value offline';
+        latencyEl.textContent = '-';
+    }
+
+    renderSysDbStats();
+}
+
+async function renderSysDbStats() {
+    const container = document.getElementById('sysDbStats');
+    if (!container) return;
+
+    const result = await api.users.stats();
+    if (!result.users) return;
+
+    const items = [
+        { icon: 'fa-users', name: '注册访客', count: result.users.total },
+        { icon: 'fa-file-alt', name: '文章数量', count: result.posts.total },
+        { icon: 'fa-eye', name: '总浏览量', count: formatNum(result.posts.views) },
+        { icon: 'fa-heart', name: '总点赞数', count: formatNum(result.posts.likes) },
+        { icon: 'fa-comments', name: '评论总数', count: result.comments },
+        { icon: 'fa-envelope', name: '留言总数', count: result.messages },
+    ];
+
+    container.innerHTML = items.map(item => `
+        <div class="system-db-item">
+            <span class="name"><i class="fas ${item.icon}"></i> ${item.name}</span>
+            <span class="count">${item.count}</span>
+        </div>
+    `).join('');
 }
 
 window.initAdmin = initAdmin;

@@ -1,11 +1,12 @@
 // 首页特定的功能
 function initHome() {
+    loadOwnerName();
+
     // 为兴趣项添加延迟动画
     const interestItems = document.querySelectorAll('.interest-item');
     interestItems.forEach((item, index) => {
         item.style.opacity = '0';
         item.style.transform = 'translateY(20px)';
-        
         setTimeout(() => {
             item.style.transition = 'opacity 0.5s, transform 0.5s';
             item.style.opacity = '1';
@@ -13,25 +14,25 @@ function initHome() {
         }, 300 + index * 100);
     });
 
-    // 加载自定义头像
     loadAvatar();
 
-    // 如果管理员已登录，启用头像编辑
+    // 管理员登录后才启用编辑
     if (api.isAdmin()) {
-        setupAvatarEdit();
+        enableEdits();
     }
 
-    // 监听认证状态变化
+    // 监听登录/登出
     window.addEventListener('auth-change', () => {
         if (api.isAdmin()) {
-            setupAvatarEdit();
+            enableEdits();
         } else {
-            removeAvatarEdit();
+            disableEdits();
         }
     });
 }
 
-// 从服务器加载头像URL
+// ====== 头像 ======
+
 function loadAvatar() {
     api.avatar.getUrl().then(result => {
         if (result && result.url) {
@@ -40,87 +41,104 @@ function loadAvatar() {
     });
 }
 
-// 更新页面上所有头像
 function updateAllAvatars(url) {
     if (!url) return;
     const apiBase = APP_CONFIG.apiBaseUrl.replace('/api', '');
-
-    // 首页头像
     const profileImg = document.getElementById('profileImg');
-    if (profileImg) {
-        profileImg.src = apiBase + url;
-    }
-
-    // 朋友圈头像
-    document.querySelectorAll('.moment-avatar').forEach(img => {
-        img.src = apiBase + url;
-    });
-
-    // 网站图标
+    if (profileImg) profileImg.src = apiBase + url;
+    document.querySelectorAll('.moment-avatar').forEach(img => { img.src = apiBase + url; });
     const favicon = document.querySelector('link[rel="icon"]');
-    if (favicon) {
-        favicon.href = apiBase + url;
-    }
+    if (favicon) favicon.href = apiBase + url;
 }
 
-// 管理员：启用头像编辑
-function setupAvatarEdit() {
-    const wrapper = document.querySelector('.avatar-wrapper');
-    if (!wrapper) {
-        console.warn('avatar-wrapper not found');
-        return;
+// ====== 名称 ======
+
+const OWNER_NAME_KEY = 'owner_name';
+
+function loadOwnerName() {
+    const saved = localStorage.getItem(OWNER_NAME_KEY);
+    if (saved) applyOwnerName(saved);
+}
+
+function applyOwnerName(name) {
+    const h1 = document.getElementById('ownerName');
+    if (h1) h1.textContent = name;
+    document.title = name + '的GitHub小窝';
+    if (window.APP_CONFIG && APP_CONFIG.site) {
+        APP_CONFIG.site.name = name + '的GitHub小窝';
+        APP_CONFIG.site.author = name;
+    }
+    document.querySelectorAll('.quote-author').forEach(el => { el.textContent = '————' + name; });
+    const logoEl = document.querySelector('.logo span');
+    if (logoEl) logoEl.textContent = name + '的小窝';
+    document.querySelectorAll('.moment-username').forEach(el => { el.textContent = name; });
+}
+
+// ====== 编辑开关 ======
+
+function enableEdits() {
+    // 头像编辑
+    const avatarW = document.querySelector('.avatar-wrapper');
+    if (avatarW && !avatarW._bound) {
+        avatarW.classList.add('show-edit');
+        avatarW.addEventListener('click', onAvatarClick);
+        avatarW._bound = true;
     }
 
-    wrapper.classList.add('show-edit');
-
-    // 移除旧事件，避免重复绑定
-    const oldHandler = wrapper._avatarClickHandler;
-    if (oldHandler) {
-        wrapper.removeEventListener('click', oldHandler);
-    }
-
-    const clickHandler = function () {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = async function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.size > 5 * 1024 * 1024) {
-                alert('图片大小不能超过 5MB');
-                return;
-            }
-
-            const result = await api.avatar.upload(file);
-            if (result && result.success) {
-                updateAllAvatars(result.url);
-                if (typeof showAuthNotification === 'function') {
-                    showAuthNotification('头像更新成功', 'success');
-                }
-            } else {
-                alert((result && result.message) || '上传失败');
-            }
+    // 名称编辑
+    const nameW = document.querySelector('.name-wrapper');
+    const h1 = document.getElementById('ownerName');
+    if (nameW && h1 && !nameW._bound) {
+        nameW.classList.add('show-edit');
+        h1.contentEditable = 'true';
+        h1.setAttribute('spellcheck', 'false');
+        h1.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); h1.blur(); } };
+        h1.onblur = () => {
+            const n = h1.textContent.trim();
+            if (n) { localStorage.setItem(OWNER_NAME_KEY, n); applyOwnerName(n); }
+            else { h1.textContent = localStorage.getItem(OWNER_NAME_KEY) || '黑色小猫'; }
         };
-        input.click();
-    };
-
-    wrapper._avatarClickHandler = clickHandler;
-    wrapper.addEventListener('click', clickHandler);
-}
-
-// 非管理员：移除编辑功能
-function removeAvatarEdit() {
-    const wrapper = document.querySelector('.avatar-wrapper');
-    if (wrapper) {
-        wrapper.classList.remove('show-edit');
-        const handler = wrapper._avatarClickHandler;
-        if (handler) {
-            wrapper.removeEventListener('click', handler);
-            delete wrapper._avatarClickHandler;
-        }
+        nameW._bound = true;
     }
 }
 
-// 导出函数
+function disableEdits() {
+    const avatarW = document.querySelector('.avatar-wrapper');
+    if (avatarW && avatarW._bound) {
+        avatarW.classList.remove('show-edit');
+        avatarW.removeEventListener('click', onAvatarClick);
+        avatarW._bound = false;
+    }
+
+    const nameW = document.querySelector('.name-wrapper');
+    const h1 = document.getElementById('ownerName');
+    if (nameW && h1 && nameW._bound) {
+        nameW.classList.remove('show-edit');
+        h1.contentEditable = 'false';
+        h1.onkeydown = null;
+        h1.onblur = null;
+        nameW._bound = false;
+    }
+}
+
+function onAvatarClick() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { alert('图片大小不能超过 5MB'); return; }
+        const result = await api.avatar.upload(file);
+        if (result && result.success) {
+            updateAllAvatars(result.url);
+            if (typeof showAuthNotification === 'function') showAuthNotification('头像更新成功', 'success');
+        } else {
+            alert((result && result.message) || '上传失败');
+        }
+    };
+    input.click();
+}
+
+// 导出
 window.initHome = initHome;

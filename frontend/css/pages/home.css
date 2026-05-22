@@ -61,6 +61,59 @@
     cursor: pointer;
 }
 
+/* 名称编辑容器 */
+.name-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.name-wrapper .name-edit-hint {
+    position: absolute;
+    top: -0.3rem;
+    right: -0.5rem;
+    background: var(--primary-color);
+    color: #fff;
+    border-radius: 50%;
+    width: 1.6rem;
+    height: 1.6rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    box-shadow: 0 2px 6px var(--shadow);
+    transition: opacity 0.3s;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.name-wrapper.show-edit .name-edit-hint {
+    display: flex;
+}
+
+.name-wrapper.show-edit:hover .name-edit-hint {
+    opacity: 0.9;
+}
+
+.name-wrapper.show-edit #ownerName {
+    cursor: text;
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.3s;
+}
+
+.name-wrapper.show-edit #ownerName:hover {
+    border-bottom-color: var(--primary-color);
+}
+
+.name-wrapper.show-edit #ownerName:focus {
+    outline: none;
+    border-bottom-color: var(--primary-color);
+    background: rgba(74, 144, 226, 0.04);
+    border-radius: 4px;
+    padding: 0 6px;
+    margin: 0 -6px;
+}
+
 .hero h1 {
     font-size: clamp(2rem, 5vw, 3rem);
     margin-bottom: 0.5rem;

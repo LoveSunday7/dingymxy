@@ -1,6 +1,7 @@
 // 首页特定的功能
 function initHome() {
     loadOwnerName();
+    loadSavedContent();
 
     // 为兴趣项添加延迟动画
     const interestItems = document.querySelectorAll('.interest-item');
@@ -74,6 +75,24 @@ function applyOwnerName(name) {
     document.querySelectorAll('.moment-username').forEach(el => { el.textContent = name; });
 }
 
+// ====== tagline & intro 内容持久化 ======
+
+const TAGLINE_KEY = 'owner_tagline';
+const INTRO_KEY = 'owner_intro';
+
+function loadSavedContent() {
+    const tagline = localStorage.getItem(TAGLINE_KEY);
+    if (tagline) {
+        const el = document.getElementById('taglineText');
+        if (el) el.textContent = tagline;
+    }
+    const intro = localStorage.getItem(INTRO_KEY);
+    if (intro) {
+        const el = document.getElementById('introText');
+        if (el) el.innerHTML = intro;
+    }
+}
+
 // ====== 编辑开关 ======
 
 function enableEdits() {
@@ -86,20 +105,13 @@ function enableEdits() {
     }
 
     // 名称编辑
-    const nameW = document.querySelector('.name-wrapper');
-    const h1 = document.getElementById('ownerName');
-    if (nameW && h1 && !nameW._bound) {
-        nameW.classList.add('show-edit');
-        h1.contentEditable = 'true';
-        h1.setAttribute('spellcheck', 'false');
-        h1.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); h1.blur(); } };
-        h1.onblur = () => {
-            const n = h1.textContent.trim();
-            if (n) { localStorage.setItem(OWNER_NAME_KEY, n); applyOwnerName(n); }
-            else { h1.textContent = localStorage.getItem(OWNER_NAME_KEY) || '黑色小猫'; }
-        };
-        nameW._bound = true;
-    }
+    makeEditable('name-wrapper', 'ownerName', OWNER_NAME_KEY, true);
+
+    // tagline 编辑
+    makeEditable(null, 'taglineText', TAGLINE_KEY, false);
+
+    // intro 编辑（保留 HTML 格式）
+    makeEditable(null, 'introText', INTRO_KEY, true);
 }
 
 function disableEdits() {
@@ -110,15 +122,48 @@ function disableEdits() {
         avatarW._bound = false;
     }
 
-    const nameW = document.querySelector('.name-wrapper');
-    const h1 = document.getElementById('ownerName');
-    if (nameW && h1 && nameW._bound) {
-        nameW.classList.remove('show-edit');
-        h1.contentEditable = 'false';
-        h1.onkeydown = null;
-        h1.onblur = null;
-        nameW._bound = false;
-    }
+    makeUneditable('name-wrapper', 'ownerName');
+    makeUneditable(null, 'taglineText');
+    makeUneditable(null, 'introText');
+}
+
+function makeEditable(wrapperClass, elId, storageKey, useInnerHTML) {
+    const wrapper = wrapperClass ? document.querySelector('.' + wrapperClass) : null;
+    const el = document.getElementById(elId);
+    if (!el || el._bound) return;
+
+    if (wrapper) wrapper.classList.add('show-edit');
+    el.classList.add('editable');
+    el.contentEditable = 'true';
+    el.setAttribute('spellcheck', 'false');
+
+    el.onkeydown = e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); }
+    };
+
+    el.onblur = () => {
+        const val = useInnerHTML ? el.innerHTML.trim() : el.textContent.trim();
+        if (val) {
+            localStorage.setItem(storageKey, val);
+        } else {
+            el[useInnerHTML ? 'innerHTML' : 'textContent'] = localStorage.getItem(storageKey) || '';
+        }
+    };
+
+    el._bound = true;
+}
+
+function makeUneditable(wrapperClass, elId) {
+    const wrapper = wrapperClass ? document.querySelector('.' + wrapperClass) : null;
+    const el = document.getElementById(elId);
+    if (!el || !el._bound) return;
+
+    if (wrapper) wrapper.classList.remove('show-edit');
+    el.classList.remove('editable');
+    el.contentEditable = 'false';
+    el.onkeydown = null;
+    el.onblur = null;
+    el._bound = false;
 }
 
 function onAvatarClick() {

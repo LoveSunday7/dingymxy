@@ -1,7 +1,7 @@
 // 前端配置文件 - 可根据部署环境修改
 const APP_CONFIG = {
     // 后端API地址
-    apiBaseUrl: 'http://172.18.217.177:8000/api',
+    apiBaseUrl: 'http://localhost:8000/api',
     // 站点信息
     site: {
         name: '黑色小猫咪的GitHub小窝',

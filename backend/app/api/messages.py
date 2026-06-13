@@ -1,25 +1,37 @@
 """留言板相关API"""
 import hashlib
+import math
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 
 from ..core.auth import get_current_admin, get_current_user_optional
+from ..core.config import get_config
 from ..core.database import get_db
 from ..models.schemas import MessageCreateRequest
 
 router = APIRouter(prefix="/messages", tags=["留言板"])
 
-# 管理员可能的名称（用于识别管理员留言）
-ADMIN_NAMES = {"黑色小猫", "admin"}
+
+def _get_admin_names() -> set[str]:
+    """从配置文件读取管理员名称列表"""
+    cfg = get_config()
+    return set(cfg.get("messages", {}).get("admin_names", ["黑色小猫", "admin"]))
+
+
+def _is_admin_name(name: str) -> bool:
+    return name in _get_admin_names()
 
 
 def _mask_message(msg: dict, is_logged_in: bool) -> dict:
     """根据登录状态脱敏留言信息"""
+    # 优先使用数据库 is_admin 列，其次检查名称
+    is_admin = bool(msg.get("is_admin_db")) or _is_admin_name(msg["name"])
+
     if is_logged_in:
         # 登录用户可以看到所有信息
-        msg["is_admin"] = msg["name"] in ADMIN_NAMES
+        msg["is_admin"] = is_admin
         # 递归处理回复
         masked_replies = []
         for reply in msg.get("replies", []):
@@ -28,7 +40,7 @@ def _mask_message(msg: dict, is_logged_in: bool) -> dict:
         return msg
 
     # 未登录用户：隐藏非管理员的真实姓名和邮箱
-    if msg["name"] in ADMIN_NAMES:
+    if is_admin:
         msg["is_admin"] = True
         # 管理员名字保留，邮箱隐藏
         msg["email"] = None
@@ -50,7 +62,7 @@ def _mask_message(msg: dict, is_logged_in: bool) -> dict:
 
     # 脱敏 reply_to_name
     if msg.get("reply_to_name"):
-        if msg["reply_to_name"] not in ADMIN_NAMES:
+        if not _is_admin_name(msg["reply_to_name"]):
             rname = msg["reply_to_name"]
             if len(rname) >= 2:
                 msg["reply_to_name"] = rname[0] + "*" * (len(rname) - 1)
@@ -77,7 +89,7 @@ async def list_messages(
 
         offset = (page - 1) * per_page
         cursor = await db.execute(
-            """SELECT id, name, email, content, likes, created_at
+            """SELECT id, name, email, content, likes, is_admin, created_at
                FROM messages WHERE parent_id IS NULL
                ORDER BY created_at DESC LIMIT ? OFFSET ?""",
             (per_page, offset),
@@ -88,12 +100,13 @@ async def list_messages(
         for r in rows:
             msg = {
                 "id": r["id"], "name": r["name"], "email": r["email"],
-                "content": r["content"], "likes": r["likes"], "created_at": r["created_at"],
+                "content": r["content"], "likes": r["likes"],
+                "is_admin_db": r["is_admin"], "created_at": r["created_at"],
                 "replies": [],
             }
             # 获取该留言的所有回复
             reply_cursor = await db.execute(
-                """SELECT id, name, email, content, likes, parent_id, reply_to_name, created_at
+                """SELECT id, name, email, content, likes, is_admin, parent_id, reply_to_name, created_at
                    FROM messages WHERE parent_id=?
                    ORDER BY created_at ASC""",
                 (r["id"],),
@@ -103,6 +116,7 @@ async def list_messages(
                 msg["replies"].append({
                     "id": rr["id"], "name": rr["name"], "email": rr["email"],
                     "content": rr["content"], "likes": rr["likes"],
+                    "is_admin_db": rr["is_admin"],
                     "parent_id": rr["parent_id"], "reply_to_name": rr["reply_to_name"],
                     "created_at": rr["created_at"],
                 })
@@ -111,23 +125,28 @@ async def list_messages(
             msg = _mask_message(msg, is_logged_in)
             messages.append(msg)
 
-        return {"messages": messages, "total": total, "page": page, "per_page": per_page}
+        total_pages = math.ceil(total / per_page) if total > 0 else 1
+        return {"messages": messages, "total": total, "page": page, "per_page": per_page, "total_pages": total_pages}
     finally:
         await db.close()
 
 
 @router.post("", summary="发表留言/回复")
-async def create_message(req: MessageCreateRequest):
+async def create_message(
+    req: MessageCreateRequest,
+    user: dict[str, Any] | None = Depends(get_current_user_optional),
+):
     db = await get_db()
     try:
         now = datetime.now(timezone.utc).isoformat()
+        is_admin = 1 if (user and user.get("role") == "admin") else 0
         cursor = await db.execute(
-            """INSERT INTO messages (name, email, content, likes, is_read, parent_id, reply_to_name, created_at)
-               VALUES (?, ?, ?, 0, 0, ?, ?, ?)""",
-            (req.name, req.email, req.content, req.parent_id, req.reply_to_name, now),
+            """INSERT INTO messages (name, email, content, likes, is_read, is_admin, parent_id, reply_to_name, created_at)
+               VALUES (?, ?, ?, 0, 0, ?, ?, ?, ?)""",
+            (req.name, req.email, req.content, is_admin, req.parent_id, req.reply_to_name, now),
         )
         await db.commit()
-        return {"success": True, "message": "留言发表成功", "data": {"id": cursor.lastrowid}}
+        return {"success": True, "message": "留言发表成功", "data": {"id": cursor.lastrowid, "is_admin": bool(is_admin)}}
     finally:
         await db.close()
 
@@ -170,7 +189,7 @@ async def list_all_messages_admin(
 
         offset = (page - 1) * per_page
         cursor = await db.execute(
-            """SELECT id, name, email, content, likes, is_read, parent_id, reply_to_name, created_at
+            """SELECT id, name, email, content, likes, is_read, is_admin, parent_id, reply_to_name, created_at
                FROM messages ORDER BY created_at DESC LIMIT ? OFFSET ?""",
             (per_page, offset),
         )
@@ -180,14 +199,16 @@ async def list_all_messages_admin(
             {
                 "id": r["id"], "name": r["name"], "email": r["email"],
                 "content": r["content"], "likes": r["likes"],
-                "is_read": bool(r["is_read"]), "parent_id": r["parent_id"],
+                "is_read": bool(r["is_read"]),
+                "is_admin": bool(r["is_admin"]) or _is_admin_name(r["name"]),
+                "parent_id": r["parent_id"],
                 "reply_to_name": r["reply_to_name"], "created_at": r["created_at"],
-                "is_admin": r["name"] in ADMIN_NAMES,
             }
             for r in rows
         ]
 
-        return {"messages": messages, "total": total, "page": page, "per_page": per_page}
+        total_pages = math.ceil(total / per_page) if total > 0 else 1
+        return {"messages": messages, "total": total, "page": page, "per_page": per_page, "total_pages": total_pages}
     finally:
         await db.close()
 

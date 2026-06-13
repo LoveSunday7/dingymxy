@@ -1,0 +1,207 @@
+@startuml 项目架构与依赖
+!theme vibrant
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam ArrowColor #333333
+skinparam defaultFontSize 12
+
+title 黑色小猫咪的GitHub小窝 — 全栈架构与依赖关系图
+
+' ============================
+' 外部依赖层
+' ============================
+cloud "📦 外部依赖" as deps {
+  queue "Python: FastAPI\naiosqlite\nPyJWT\nPyYAML\nuvicorn" as py_deps
+  queue "JS: Font Awesome\n纯原生 ES6\n无框架依赖" as js_deps
+}
+
+' ============================
+' 配置层
+' ============================
+package "⚙️ 配置层" as config_layer {
+  file "config.yaml" as config_yaml {
+    card "server" as cfg_server
+    card "auth" as cfg_auth
+    card "database" as cfg_db
+    card "blog" as cfg_blog
+    card "upload" as cfg_upload
+    card "admin" as cfg_admin
+  }
+  file "config.example.js" as config_js {
+    card "API_BASE_URL" as cfg_api
+  }
+}
+
+' ============================
+' 后端核心
+' ============================
+package "🔧 后端核心 (backend/app/core/)" as backend_core {
+  [config.py\nget_config()\nload_config()\n环境变量覆盖] as b_config
+  [database.py\nget_db()\ninit_db()\n_migrate()\nSCHEMA_SQL] as b_database
+  [auth.py\nhash_password()\nverify_password()\ncreate_access_token()\ncreate_admin_token()\nget_current_user()\nget_current_user_optional()\nget_current_admin()\ncheck_permission()\nis_page_public()\ncan_access_page()] as b_auth
+}
+
+' ============================
+' 后端 API 路由
+' ============================
+package "📡 后端 API 路由 (backend/app/api/)" as backend_api {
+  [auth.py\nPOST /login\nPOST /register\nGET /me] as api_auth
+  [blog.py\nGET/POST /posts\nPUT/DELETE /posts/{id}\nPOST /posts/{id}/like\nPOST /posts/{id}/comments\nGET /categories\nGET /tags\nPOST /categories\nPOST /tags] as api_blog
+  [users.py\nGET /users\nPOST /users\nPUT/DELETE /users/{id}\nPOST /users/{id}/permissions\nDELETE /permissions/{id}\nGET/PUT /public-pages\nGET /public-pages/list] as api_users
+  [messages.py\nGET /messages\nPOST /messages\nPOST /messages/{id}/like\nDELETE /messages/{id}\nGET /messages/admin/all\nPUT /messages/{id}/read] as api_messages
+}
+
+' ============================
+' 后端模型层
+' ============================
+package "📐 数据模型 (backend/app/models/)" as models_layer {
+  [schemas.py\nUserCreateRequest\nUserUpdateRequest\nPostCreateRequest\nPostUpdateRequest\nPermissionCreateRequest\nPublicPageUpdate\nMessageCreateRequest\n...24个Pydantic模型] as models
+}
+
+' ============================
+' 后端入口
+' ============================
+package "🚀 应用入口" as app_entry {
+  [main.py\ncreate_app() → FastAPI\nlifespan() 生命周期\nCORS 中间件\n路由注册\n健康检查\n静态文件挂载\n示例数据种子] as app_main
+  [backend/main.py\nuvicorn 启动] as backend_main
+}
+
+' ============================
+' 数据库
+' ============================
+database "🗄️ SQLite 数据库" as sqlite {
+  collections "admins" as db_admins
+  collections "users" as db_users
+  collections "permissions" as db_perm
+  collections "posts" as db_posts
+  collections "categories" as db_cat
+  collections "tags" as db_tags
+  collections "post_tags" as db_pt
+  collections "comments" as db_com
+  collections "messages" as db_msg
+  collections "public_pages" as db_pp
+}
+
+' ============================
+' 前端模块
+' ============================
+package "🎨 前端 (frontend/)" as frontend {
+  package "入口" as fe_core {
+    [index.html\nSPA 入口\n6 页面容器] as index_html
+    [router.js\nHash路由\n权限守卫\n6页面切换\nnav 可见性] as router_js
+    [api.js\nREST API 封装\nfetch 请求\nToken 管理] as api_js
+  }
+
+  package "核心模块" as fe_modules {
+    [auth.js\n登录/注册 UI\nJWT Token 存储\nauth-change 事件] as auth_js
+    [admin.js\n文章 CRUD 管理\n用户/权限管理\n公开页面/首页编辑] as admin_js
+    [theme.js\n主题切换\nlocalStorage 持久化] as theme_js
+    [background.js\n动态背景效果] as bg_js
+    [utils.js\n通用工具函数] as utils_js
+  }
+
+  package "页面模块 (js/pages/)" as fe_pages {
+    [home.js\n名言/简介\n关键词/音乐] as page_home
+    [resume.js\n简历信息] as page_resume
+    [experience.js\n经历时间线] as page_exp
+    [blog.js\n文章列表/详情\n搜索/评论] as page_blog
+    [friends.js\n朋友圈] as page_friends
+    [contact.js\n联系我] as page_contact
+  }
+
+  package "HTML 模板" as fe_tpl {
+    folder "modules/" as tpl_dir
+  }
+
+  package "样式" as fe_css {
+    folder "css/" as css_dir
+  }
+}
+
+' ============================
+' 依赖关系
+' ============================
+
+' 配置流向
+config_yaml --> b_config : PyYAML 加载
+b_config --> b_database : get_db_path()
+b_config --> b_auth : get_config()["auth"]
+b_config --> app_main : get_config()
+
+' 后端内部依赖
+b_database <.. api_auth : get_db()
+b_database <.. api_blog : get_db()
+b_database <.. api_users : get_db()
+b_database <.. api_messages : get_db()
+b_database ..> sqlite : aiosqlite.connect()
+
+b_auth <.. api_auth : get_current_user\nget_current_admin
+b_auth <.. api_users : get_current_admin\nis_page_public
+b_auth <.. api_messages : get_current_user_optional\nget_current_admin
+b_auth ..> b_database : get_db()
+
+models <.. api_auth
+models <.. api_blog
+models <.. api_users
+models <.. api_messages
+
+' 后端入口依赖
+app_main --> api_auth : include_router
+app_main --> api_blog : include_router
+app_main --> api_users : include_router
+app_main --> api_messages : include_router
+app_main --> b_config : get_config()
+app_main --> b_database : init_db()\nget_db()
+app_main --> b_auth : hash_password()
+backend_main --> app_main : uvicorn 启动
+
+' 前端内部依赖
+index_html --> router_js : initRouter()
+index_html --> auth_js : showAuthModal()
+index_html --> theme_js : initTheme()
+index_html --> bg_js : initBackground()
+index_html --> utils_js
+
+router_js --> api_js : api.users.listPublicPages()
+router_js --> auth_js : auth-change 事件
+router_js --> page_home
+router_js --> page_resume
+router_js --> page_exp
+router_js --> page_blog
+router_js --> page_friends
+router_js --> page_contact
+
+page_home --> api_js
+page_blog --> api_js
+page_contact --> api_js
+admin_js --> api_js
+auth_js --> api_js
+
+' 前后端 HTTP 交互
+api_js ..> app_main : HTTP REST\nJSON 格式
+
+' 外部依赖引用
+py_deps ..> app_main : pip install
+js_deps ..> index_html : CDN 加载
+config_js ..> api_js : API_BASE_URL
+
+note right of api_js
+  <b>前后端交互协议</b>
+  • RESTful API (JSON)
+  • JWT Bearer Token 认证
+  • CORS 跨域支持
+  • Content-Type: application/json
+end note
+
+note bottom of router_js
+  <b>SPA Hash 路由</b>
+  #home → 首页
+  #resume → 简历
+  #experience → 经历
+  #blog → 博客
+  #friends → 朋友圈
+  #contact → 联系我
+end note
+
+@enduml

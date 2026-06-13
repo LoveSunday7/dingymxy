@@ -19,7 +19,7 @@ server:
 # 数据库配置
 database:
   # SQLite数据库文件路径（相对于backend目录）
-  path: "data/dingymxy.db"
+  path: "db/dingymxy.db"
   # 是否在启动时自动创建表
   auto_create_tables: true
   # 是否插入示例数据（首次启动）
@@ -90,3 +90,12 @@ logging:
   level: "INFO"
   # 日志文件路径（相对于backend目录）
   file: "data/app.log"
+
+# 留言板配置
+messages:
+  # 管理员名称列表（用于识别管理员留言）
+  admin_names:
+    - "黑色小猫"
+    - "admin"
+  # 敏感词列表
+  sensitive_words: []

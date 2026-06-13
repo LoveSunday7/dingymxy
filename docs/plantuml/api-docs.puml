@@ -1,0 +1,521 @@
+@startuml API接口文档
+!theme vibrant
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam ArrowColor #333333
+skinparam BorderColor #666666
+
+title 黑色小猫咪的GitHub小窝 — REST API 接口文档\n服务地址: {API_BASE}/api | 认证方式: Bearer JWT Token
+
+left header
+  <b>状态码说明</b>
+  • 200: 成功
+  • 400: 参数错误/数据冲突
+  • 401: 未认证/JWT过期
+  • 403: 权限不足
+  • 404: 资源不存在
+  • 500: 服务器内部错误
+end header
+
+' ============================
+' Auth API
+' ============================
+rectangle "🔐 认证模块 — /api/auth" as api_auth_box #LightYellow {
+
+  card "POST /login" as auth_login #LightGreen
+  note right of auth_login
+    <b>用户/管理员登录</b>
+    ─────────────────
+    <b>Request Body:</b>
+    {
+      "access_code": "string",  // 访客登录
+      "username": "string",     // 管理员登录
+      "password": "string"      // 管理员登录
+    }
+    ─────────────────
+    <b>Response 200:</b>
+    {
+      "success": true,
+      "access_token": "eyJ...",
+      "token_type": "bearer",
+      "user": { "id":1, "name":"..", "role":"user|admin" }
+    }
+    ─────────────────
+    <b>认证:</b> 无需Token
+  end note
+
+  card "POST /register" as auth_register #LightGreen
+  note right of auth_register
+    <b>访客注册（管理员创建）</b>
+    ─────────────────
+    <b>Request Body:</b>
+    {
+      "name": "string",
+      "phone": "string",
+      "email": "string",
+      "wechat": "string",
+      "qq": "string"
+    }
+    ─────────────────
+    <b>Response 200:</b>
+    {
+      "success": true,
+      "data": { "id":1, "access_code":"8位随机码" }
+    }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "GET /me" as auth_me #LightBlue
+  note right of auth_me
+    <b>获取当前用户信息</b>
+    ─────────────────
+    <b>Request Header:</b>
+    Authorization: Bearer {token}
+    ─────────────────
+    <b>Response 200:</b>
+    {
+      "user_id": 1,
+      "role": "user|admin",
+      "name": ".."
+    }
+    ─────────────────
+    <b>认证:</b> 任意有效Token
+  end note
+}
+
+' ============================
+' Blog API
+' ============================
+rectangle "📝 博客模块 — /api/blog" as api_blog_box #LightYellow {
+
+  card "GET /posts" as blog_list #LightBlue
+  note right of blog_list
+    <b>文章列表（公开）</b>
+    ─────────────────
+    <b>Query Params:</b>
+    • page (int, default=1)
+    • per_page (int, max=50)
+    • category (string, 按分类slug筛选)
+    • tag (string, 按标签slug筛选)
+    • search (string, 标题/摘要/内容模糊搜索)
+    ─────────────────
+    <b>Response:</b>
+    { "posts": [...], "total":100, "page":1,
+      "per_page":10, "total_pages":10 }
+    ─────────────────
+    <b>每个post:</b>
+    { id, title, slug, excerpt, is_featured,
+      views, likes, author_name, published_at,
+      category:{id,name,slug},
+      tags:[{id,name,slug}], comments_count }
+  end note
+
+  card "GET /posts/{id}" as blog_get #LightBlue
+  note right of blog_get
+    <b>文章详情（公开）</b>
+    ─────────────────
+    <b>自动:</b> views+1
+    ─────────────────
+    <b>Response:</b>
+    { id, title, slug, content (HTML),
+      category, tags, comments (嵌套),
+      related_posts, total likes/views }
+  end note
+
+  card "POST /posts" as blog_create #LightCoral
+  note right of blog_create
+    <b>创建文章</b>
+    ─────────────────
+    <b>Request Body:</b>
+    { title, slug?, excerpt, content,
+      category_id?, is_published?,
+      is_featured?, author_name?, tag_ids:[] }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "PUT /posts/{id}" as blog_update #LightCoral
+  note right of blog_update
+    <b>更新文章</b>
+    ─────────────────
+    <b>Request Body:</b>
+    { title?, slug?, excerpt?, content?,
+      category_id?, is_published?,
+      is_featured?, author_name?, tag_ids? }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "DELETE /posts/{id}" as blog_delete #LightCoral
+  note right of blog_delete
+    <b>删除文章</b>
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "POST /posts/{id}/like" as blog_like #LightBlue
+  note right of blog_like
+    <b>点赞文章</b>
+    ─────────────────
+    <b>Response:</b>
+    { success, data:{likes:当前点赞数} }
+  end note
+
+  card "POST /posts/{id}/comments" as blog_comment #LightBlue
+  note right of blog_comment
+    <b>发表评论</b>
+    ─────────────────
+    <b>Request Body:</b>
+    { author_name, author_email?,
+      content, user_id?, parent_id? }
+    ─────────────────
+    <b>注:</b> 自动审核通过(is_approved=1)
+  end note
+
+  card "DELETE /comments/{id}" as blog_del_comment #LightCoral
+  card "POST /comments/{id}/like" as blog_like_comment #LightBlue
+
+  card "GET /categories" as cat_list #LightBlue
+  note right of cat_list
+    <b>分类列表（含文章计数）</b>
+    ─────────────────
+    <b>Response:</b>
+    [{ id, name, slug, description, post_count }]
+  end note
+
+  card "POST /categories" as cat_create #LightCoral
+  note right of cat_create
+    <b>创建分类</b>
+    ─────────────────
+    <b>Request:</b> { name, slug, description? }
+    ─────────────────
+    <b>认证:</b> Admin Token
+    ─────────────────
+    <b>约束:</b> name/slug UNIQUE
+  end note
+
+  card "GET /tags" as tag_list #LightBlue
+  note right of tag_list
+    <b>标签列表（含文章计数）</b>
+    ─────────────────
+    <b>Response:</b>
+    [{ id, name, slug, post_count }]
+  end note
+
+  card "POST /tags" as tag_create #LightCoral
+  note right of tag_create
+    <b>创建标签</b>
+    ─────────────────
+    <b>Request:</b> { name, slug }
+    ─────────────────
+    <b>约束:</b> name/slug UNIQUE
+  end note
+}
+
+' ============================
+' Users API
+' ============================
+rectangle "👥 用户管理 — /api/users" as api_users_box #LightYellow {
+
+  card "GET /users" as user_list #LightBlue
+  note right of user_list
+    <b>用户列表（分页）</b>
+    ─────────────────
+    <b>Query:</b> page, per_page
+    ─────────────────
+    <b>Response:</b>
+    { users:[{id,name,phone,email,wechat,qq,
+      is_verified,access_code,last_login_at,
+      created_at}], total, page, per_page }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "POST /users" as user_create #LightCoral
+  note right of user_create
+    <b>创建用户</b>
+    ─────────────────
+    <b>Request:</b> { name, phone?, email?,
+      wechat?, qq? }
+    ─────────────────
+    <b>Response:</b>
+    { success, data:{id, access_code:8位随机码} }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "PUT /users/{id}" as user_update #LightCoral
+  note right of user_update
+    <b>更新用户信息</b>
+    ─────────────────
+    <b>Request:</b> { name?, phone?, email?,
+      wechat?, qq?, is_verified? }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "DELETE /users/{id}" as user_delete #LightCoral
+
+  card "POST /users/{uid}/permissions" as perm_create #LightCoral
+  note right of perm_create
+    <b>为用户分配权限</b>
+    ─────────────────
+    <b>Request:</b>
+    { resource_type:"page|post|category",
+      resource_id:"blog|resume|..." }
+    ─────────────────
+    <b>约束:</b> UNIQUE(user_id, type, resource_id)
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "DELETE /users/{uid}/permissions/{pid}" as perm_delete #LightCoral
+
+  card "GET /users/check-access/{page_id}" as access_check #LightBlue
+  note right of access_check
+    <b>检查页面访问权限</b>
+    ─────────────────
+    <b>Response:</b>
+    { accessible: true|false }
+    ─────────────────
+    <b>逻辑:</b> 公开页面→true, 否则检查permissions表
+  end note
+
+  card "GET /public-pages/list" as pp_list #LightBlue
+  note right of pp_list
+    <b>公开页面ID列表</b>
+    ─────────────────
+    <b>Response:</b>
+    { public_pages: ["home","blog",...] }
+  end note
+
+  card "GET /public-pages" as pp_get #LightCoral
+  note right of pp_get
+    <b>公开页面详情（管理员）</b>
+    ─────────────────
+    <b>Response:</b>
+    [{ id, page_id, is_public, updated_at }]
+  end note
+
+  card "PUT /public-pages" as pp_update #LightCoral
+  note right of pp_update
+    <b>更新公开页面状态</b>
+    ─────────────────
+    <b>Request:</b>
+    { page_id:"blog", is_public:true }
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+}
+
+' ============================
+' Messages API
+' ============================
+rectangle "💬 留言板 — /api/messages" as api_msg_box #LightYellow {
+
+  card "GET /messages" as msg_list #LightBlue
+  note right of msg_list
+    <b>留言列表（树形 + 脱敏）</b>
+    ─────────────────
+    <b>Query:</b> page, per_page (max=100)
+    ─────────────────
+    <b>Response:</b>
+    {
+      messages: [{
+        id, name, email, content, likes,
+        created_at, is_admin, replies: [...]
+      }],
+      total, page, per_page
+    }
+    ─────────────────
+    <b>脱敏规则 (未登录):</b>
+    • 管理员名保留，邮箱隐藏
+    • 访客名: "张三"→"张**", 单字→"访客"
+    • reply_to_name 同样脱敏
+    ─────────────────
+    <b>登录用户:</b> 看到完整信息
+  end note
+
+  card "POST /messages" as msg_create #LightBlue
+  note right of msg_create
+    <b>发表留言/回复</b>
+    ─────────────────
+    <b>Request:</b>
+    { name, email?, content,
+      parent_id?, reply_to_name? }
+    ─────────────────
+    <b>功能:</b> 支持嵌套回复 (parent_id)
+  end note
+
+  card "POST /messages/{id}/like" as msg_like #LightBlue
+  note right of msg_like
+    <b>点赞留言</b>
+    ─────────────────
+    <b>Response:</b>
+    { success, data:{likes:当前点赞数} }
+  end note
+
+  card "DELETE /messages/{id}" as msg_delete #LightCoral
+  note right of msg_delete
+    <b>删除留言</b>
+    ─────────────────
+    <b>认证:</b> Admin Token
+    ─────────────────
+    <b>级联:</b> 子回复同时删除 (CASCADE)
+  end note
+
+  card "GET /admin/all" as msg_admin #LightCoral
+  note right of msg_admin
+    <b>管理员留言列表（扁平）</b>
+    ─────────────────
+    <b>Query:</b> page, per_page (max=200)
+    ─────────────────
+    <b>无需脱敏:</b> 直接返回原始数据
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+
+  card "PUT /messages/{id}/read" as msg_read #LightCoral
+  note right of msg_read
+    <b>标记留言已读</b>
+    ─────────────────
+    <b>认证:</b> Admin Token
+  end note
+}
+
+' ============================
+' System API
+' ============================
+rectangle "⚙️ 系统 — /" as api_sys_box #LightYellow {
+
+  card "GET /" as sys_root #LightBlue
+  note right of sys_root
+    <b>API首页（服务信息）</b>
+    ─────────────────
+    <b>Response:</b>
+    { name, version, docs:"/docs",
+      endpoints:{auth, blog, users, messages} }
+  end note
+
+  card "GET /api/health" as sys_health #LightBlue
+  note right of sys_health
+    <b>健康检查</b>
+    ─────────────────
+    <b>Response:</b>
+    { status:"ok", server_time:"..",
+      started_at:"..", uptime:"X天X时X分X秒",
+      uptime_seconds }
+  end note
+}
+
+' ============================
+' Token 结构
+' ============================
+rectangle "🎫 JWT Token 内部结构" as jwt_box #PaleGreen {
+  note as jwt_note
+    <b>JWT Payload:</b>
+    ─────────────────────────────
+    <b>用户Token:</b>
+    {
+      "user_id": 1,
+      "role": "user",      // user | admin
+      "name": "张三",
+      "exp": 1234567890    // 过期时间戳 (小时级)
+    }
+    ─────────────────────────────
+    <b>管理员Token:</b>
+    {
+      "user_id": 1,
+      "role": "admin",
+      "username": "admin",
+      "exp": 1234567890    // 过期时间戳 (可配置更长)
+    }
+    ─────────────────────────────
+    <b>配置项 (config.yaml):</b>
+    • secret_key: 签名密钥
+    • algorithm: HS256
+    • access_token_expire_hours: 用户Token过期时间
+    • admin_token_expire_hours: 管理员Token过期时间
+  end note
+}
+
+' ============================
+' Database Schema
+' ============================
+rectangle "🗄️ 数据库核心表结构" as db_schema_box #MistyRose {
+
+  card "admins" as tb_admin
+  note right of tb_admin
+    id (PK), username (UNIQUE),
+    password_hash, email,
+    created_at, updated_at
+  end note
+
+  card "users" as tb_user
+  note right of tb_user
+    id (PK), name, phone, email,
+    wechat, qq, access_code (UNIQUE),
+    is_verified, last_login_at,
+    created_at, updated_at
+  end note
+
+  card "permissions" as tb_perm
+  note right of tb_perm
+    id (PK), user_id (FK→users),
+    resource_type, resource_id,
+    created_at,
+    UNIQUE(user_id, resource_type, resource_id)
+  end note
+
+  card "posts" as tb_post
+  note right of tb_post
+    id (PK), title, slug (UNIQUE),
+    excerpt, content, category_id (FK),
+    is_published, is_featured,
+    views, likes, author_name,
+    published_at, created_at, updated_at
+  end note
+
+  card "categories" as tb_cat
+  note right of tb_cat
+    id (PK), name (UNIQUE),
+    slug (UNIQUE), description,
+    created_at
+  end note
+
+  card "tags" as tb_tag
+  note right of tb_tag
+    id (PK), name (UNIQUE),
+    slug (UNIQUE), created_at
+  end note
+
+  card "comments" as tb_comment
+  note right of tb_comment
+    id (PK), post_id (FK→posts),
+    user_id (FK→users), author_name,
+    content, likes, parent_id (自引用FK),
+    is_approved, created_at
+  end note
+
+  card "messages" as tb_msg
+  note right of tb_msg
+    id (PK), name, email, content,
+    likes, is_read, parent_id (自引用FK),
+    reply_to_name, created_at
+  end note
+
+  card "post_tags" as tb_pt
+  note right of tb_pt
+    PK(post_id, tag_id),
+    FK→posts, FK→tags
+  end note
+
+  card "public_pages" as tb_pp
+  note right of tb_pp
+    id (PK), page_id (UNIQUE),
+    is_public, updated_at
+  end note
+}
+
+@enduml

@@ -1,0 +1,173 @@
+@startuml 前后端数据交互序列图
+!theme vibrant
+skinparam backgroundColor #FEFEFE
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+skinparam defaultFontSize 11
+
+title 前后端数据交互 — 核心流程序列图
+
+actor "👤 访客" as visitor
+actor "🔑 管理员" as admin
+
+box "🖥️ 前端 (Browser)" #LightSkyBlue
+  participant "index.html\n(SPA入口)" as html
+  participant "router.js\n(Hash路由)" as router
+  participant "auth.js\n(认证模块)" as auth_fe
+  participant "api.js\n(API客户端)" as api_fe
+  participant "admin.js\n(管理面板)" as admin_fe
+  participant "blog.js\n(博客页面)" as blog_fe
+  participant "contact.js\n(留言页面)" as contact_fe
+end box
+
+box "⚡ 后端 (FastAPI Server)" #LightCoral
+  participant "main.py\n(lifespan + CORS)" as main
+  participant "core/auth.py\n(JWT中间件)" as auth_be
+  participant "api/auth.py\n(/api/auth)" as be_auth
+  participant "api/blog.py\n(/api/blog)" as be_blog
+  participant "api/messages.py\n(/api/messages)" as be_msg
+  participant "api/users.py\n(/api/users)" as be_users
+  participant "core/database.py\n(get_db)" as db
+end box
+
+database "🗄️ SQLite" as sqlite
+
+== 🔄 应用启动与初始化 ==
+
+main -> main : lifespan() 启动
+main -> db : init_db() 创建表
+db -> sqlite : CREATE TABLE IF NOT EXISTS...
+main -> db : get_db()
+main -> sqlite : INSERT 默认管理员\nINSERT 示例分类/标签/文章
+main -> be_auth : register /api/auth
+main -> be_blog : register /api/blog
+main -> be_users : register /api/users
+main -> be_msg : register /api/messages
+html -> router : initRouter()
+router -> api_fe : api.users.listPublicPages()
+api_fe -> be_users : GET /api/users/public-pages/list
+be_users -> db : get_db()
+be_users -> auth_be : get_all_public_pages()
+auth_be -> db : get_db()
+db -> sqlite : SELECT page_id FROM public_pages
+be_users --> api_fe : { public_pages: [...] }
+api_fe --> router : 更新 pageAccessCache
+router -> router : updateNavVisibility()
+
+== 🔑 用户登录流程 ==
+
+visitor -> html : 点击「验证身份」
+html -> auth_fe : showAuthModal()
+auth_fe -> auth_fe : 显示登录表单
+visitor -> auth_fe : 输入访问码
+auth_fe -> api_fe : POST /api/auth/login\n{ access_code: "xxx" }
+api_fe -> be_auth : POST /api/auth/login
+be_auth -> db : get_db()
+db -> sqlite : SELECT * FROM users\nWHERE access_code=?
+be_auth -> auth_be : create_access_token({user_id, role})
+auth_be --> be_auth : JWT Token
+be_auth --> api_fe : { success, access_token, user }
+api_fe -> auth_fe : 存储 token 到 localStorage
+auth_fe -> auth_fe : dispatchEvent('auth-change')
+router -> api_fe : api.users.listPublicPages() 刷新权限缓存
+router -> router : updateNavVisibility()
+
+== 🔐 管理员登录 ==
+
+admin -> html : 点击「验证身份」
+admin -> auth_fe : 输入用户名 + 密码
+auth_fe -> api_fe : POST /api/auth/login\n{ username, password }
+api_fe -> be_auth : POST /api/auth/login
+be_auth -> db : get_db()
+db -> sqlite : SELECT * FROM admins\nWHERE username=?
+be_auth -> auth_be : verify_password(password, hash)
+be_auth -> auth_be : create_admin_token({user_id, role:"admin"})
+be_auth --> api_fe : { access_token, user: {role:"admin"} }
+api_fe --> auth_fe : 存储 token
+auth_fe --> router : auth-change 事件
+router -> router : 管理员可访问所有页面
+
+== 📝 博客浏览流程 ==
+
+visitor -> html : 点击「博客」
+router -> router : switchPage('blog')\n权限检查通过
+blog_fe -> api_fe : GET /api/blog/posts?page=1
+api_fe -> be_blog : GET /api/blog/posts
+be_blog -> db : get_db()
+db -> sqlite : SELECT posts JOIN categories\nWHERE is_published=1\nORDER BY featured DESC
+be_blog --> api_fe : { posts: [...], total, total_pages }
+api_fe --> blog_fe : 渲染文章列表
+
+visitor -> blog_fe : 点击文章标题
+blog_fe -> api_fe : GET /api/blog/posts/{id}
+api_fe -> be_blog : GET /api/blog/posts/{id}
+be_blog -> db : get_db()
+db -> sqlite : SELECT post + UPDATE views+1\n+ SELECT tags + SELECT comments\n+ SELECT related posts
+be_blog --> api_fe : { id, title, content, tags, comments, related_posts }
+api_fe --> blog_fe : 渲染文章详情
+
+visitor -> blog_fe : 输入评论内容
+blog_fe -> api_fe : POST /api/blog/posts/{id}/comments\n{ author_name, content }
+api_fe -> be_blog : POST /api/blog/posts/{id}/comments
+be_blog -> db : get_db()
+db -> sqlite : INSERT INTO comments
+be_blog --> api_fe : { success: true, data: {id} }
+api_fe --> blog_fe : 刷新评论列表
+
+== 💬 留言板交互（含脱敏） ==
+
+visitor -> html : 点击「联系我」
+contact_fe -> api_fe : GET /api/messages?page=1
+api_fe -> be_msg : GET /api/messages
+note right of be_msg
+  Depends(get_current_user_optional)
+  未登录 → user=None
+end note
+be_msg -> db : get_db()
+db -> sqlite : SELECT 顶级留言 + 嵌套回复
+be_msg -> be_msg : _mask_message(msg, is_logged_in=false)\n名字脱敏: "张三" → "张**"\n邮箱隐藏
+be_msg --> api_fe : { messages: [...脱敏后...], total }
+api_fe --> contact_fe : 渲染留言列表（脱敏版）
+
+contact_fe -> api_fe : POST /api/messages\n{ name, content, parent_id? }
+api_fe -> be_msg : POST /api/messages
+be_msg -> db : get_db()
+db -> sqlite : INSERT INTO messages
+be_msg --> api_fe : { success: true, data: {id} }
+api_fe --> contact_fe : 刷新留言
+
+== 🛠️ 管理后台操作 ==
+
+admin -> html : 点击管理面板
+admin_fe -> admin_fe : 显示后台 UI
+
+group 管理文章
+  admin_fe -> api_fe : POST /api/blog/posts\n(Authorization: Bearer JWT)
+  api_fe -> be_blog : POST /api/blog/posts
+  be_blog -> auth_be : Depends(get_current_admin)
+  auth_be -> auth_be : 解码 JWT\n检查 role=="admin"
+  be_blog -> db : get_db()
+  db -> sqlite : INSERT INTO posts + post_tags
+  be_blog --> api_fe : { success, data: {id, slug} }
+end
+
+group 管理用户权限
+  admin_fe -> api_fe : POST /api/users/{uid}/permissions\n{ resource_type:"page", resource_id:"blog" }
+  api_fe -> be_users : POST /api/users/{uid}/permissions
+  be_users -> auth_be : Depends(get_current_admin)
+  be_users -> db : get_db()
+  db -> sqlite : INSERT INTO permissions\nUNIQUE(user_id, resource_type, resource_id)
+  be_users --> api_fe : { success: true }
+end
+
+group 公开页面管理
+  admin_fe -> api_fe : PUT /api/users/public-pages\n{ page_id:"blog", is_public: true }
+  api_fe -> be_users : PUT /api/users/public-pages
+  be_users -> auth_be : Depends(get_current_admin) + is_page_public()
+  be_users -> db : get_db()
+  db -> sqlite : INSERT OR REPLACE INTO public_pages
+  be_users --> api_fe : { success: true }
+  note right: 前端刷新权限缓存\n所有人立即可访问
+end
+
+@enduml

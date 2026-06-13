@@ -928,6 +928,167 @@ body.panel-open {
   50% { opacity: 0.3; }
 }
 
+/* ---- 子Tab ---- */
+.admin-sub-tabs {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 0.6rem;
+    flex-shrink: 0;
+}
+.admin-sub-tab {
+    padding: 0.35rem 0.8rem;
+    border: 1px solid rgba(74, 144, 226, 0.12);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-color);
+    opacity: 0.6;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+.admin-sub-tab:hover { opacity: 0.85; border-color: rgba(74, 144, 226, 0.25); }
+.admin-sub-tab.active {
+    opacity: 1;
+    background: var(--primary-color);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* ---- 内联提示 ---- */
+.admin-hint-inline {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-left: 0.5rem;
+}
+
+/* ---- 配置展示 ---- */
+.admin-config-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+/* ---- 列表卡片（经历/朋友圈管理） ---- */
+.admin-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+.admin-list-container::-webkit-scrollbar { width: 4px; }
+.admin-list-container::-webkit-scrollbar-thumb {
+    background: rgba(74, 144, 226, 0.15);
+    border-radius: 4px;
+}
+
+.admin-list-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(74, 144, 226, 0.08);
+    border-radius: var(--border-radius, 0.75rem);
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.admin-list-card:hover {
+    border-color: rgba(74, 144, 226, 0.18);
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+.admin-list-card-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
+    flex: 1;
+}
+
+.admin-list-card-actions {
+    display: flex;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.admin-list-badge {
+    font-size: 0.65rem;
+    padding: 0.08rem 0.4rem;
+    border-radius: 4px;
+    background: rgba(74, 144, 226, 0.12);
+    color: var(--primary-color);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* ---- 简历编辑器 ---- */
+.admin-resume-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+.admin-resume-editor::-webkit-scrollbar { width: 4px; }
+.admin-resume-editor::-webkit-scrollbar-thumb {
+    background: rgba(74, 144, 226, 0.15);
+    border-radius: 4px;
+}
+
+.admin-section-card {
+    padding: 0.5rem 0.7rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(74, 144, 226, 0.08);
+    border-radius: var(--border-radius, 0.75rem);
+    flex-shrink: 0;
+}
+
+.admin-section-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(74, 144, 226, 0.08);
+    font-size: 0.82rem;
+    color: var(--text-color);
+}
+.admin-section-card-header i { color: var(--primary-color); margin-right: 0.25rem; }
+
+.resume-field-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(74, 144, 226, 0.04);
+    flex-wrap: wrap;
+}
+.resume-field-row:last-child { border-bottom: none; }
+.resume-field-row input,
+.resume-field-row textarea,
+.resume-field-row select {
+    font-size: 0.78rem;
+    padding: 0.25rem 0.4rem;
+}
+.resume-field-row .resume-value { flex: 1; min-width: 120px; }
+.resume-field-row.new-field {
+    background: rgba(74, 144, 226, 0.04);
+    border-radius: 6px;
+    padding: 0.35rem;
+}
+
+/* ---- 评论管理 ---- */
+.admin-comments-section {
+    font-size: 0.78rem;
+}
+
 /* ---- 响应式 ---- */
 @media (max-width: 900px) {
   .admin-stats {

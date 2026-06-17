@@ -17,6 +17,10 @@ let adminState = {
     msgPage: 1,
     msgTotal: 0,
     sysTimer: null,
+    expSubTab: 'timeline',
+    friendsPage: 1,
+    friendsTotal: 0,
+    friendsTotalPages: 1,
 };
 
 function initAdmin() {
@@ -97,10 +101,42 @@ function bindAdminEvents() {
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-            // 切换到系统状态tab时刷新
+            // 按需加载各Tab数据
             if (tab.dataset.tab === 'system') loadSystemStatus();
+            if (tab.dataset.tab === 'resume-admin') loadResumeAdmin();
+            if (tab.dataset.tab === 'experience-admin') loadExperienceAdmin();
+            if (tab.dataset.tab === 'friends-admin') loadFriendsAdmin();
+            if (tab.dataset.tab === 'messages') loadMsgConfig();
         });
     });
+
+    // 经历管理子Tab切换
+    document.getElementById('expSubTabs')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.admin-sub-tab');
+        if (!btn) return;
+        document.querySelectorAll('#expSubTabs .admin-sub-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        adminState.expSubTab = btn.dataset.sub;
+        document.getElementById('addExpItemLabel').textContent = btn.dataset.sub === 'timeline' ? '添加事件' : '添加项目';
+        loadExperienceAdmin();
+    });
+
+    // 通用表单弹窗
+    document.getElementById('cancelAdminForm')?.addEventListener('click', closeAdminForm);
+    document.getElementById('adminFormOverlay')?.addEventListener('click', closeAdminForm);
+    document.getElementById('confirmAdminForm')?.addEventListener('click', submitAdminForm);
+
+    // 简历保存按钮
+    document.getElementById('saveResumeBtn')?.addEventListener('click', saveResumeFields);
+
+    // 经历添加按钮
+    document.getElementById('addExpItemBtn')?.addEventListener('click', () => {
+        if (adminState.expSubTab === 'timeline') openEventForm();
+        else openProjectForm();
+    });
+
+    // 朋友圈发布按钮
+    document.getElementById('addMomentBtn')?.addEventListener('click', () => openMomentForm());
 
     // 搜索用户
     let searchTimer = null;
@@ -596,6 +632,624 @@ async function renderSysDbStats() {
             <span class="count">${item.count}</span>
         </div>
     `).join('');
+}
+
+// ====== 通用表单弹窗 ======
+
+let adminFormCallback = null;
+
+function openAdminForm(title, bodyHtml, onConfirm) {
+    document.getElementById('adminFormTitle').innerHTML = `<i class="fas fa-edit"></i> ${title}`;
+    document.getElementById('adminFormBody').innerHTML = bodyHtml;
+    document.getElementById('adminFormModal').style.display = 'flex';
+    adminFormCallback = onConfirm;
+}
+
+function closeAdminForm() {
+    document.getElementById('adminFormModal').style.display = 'none';
+    adminFormCallback = null;
+}
+
+function submitAdminForm() {
+    if (adminFormCallback) {
+        adminFormCallback();
+    }
+}
+
+// ====== 简历管理 ======
+
+async function loadResumeAdmin() {
+    const container = document.getElementById('adminResumeEditor');
+    if (!container) return;
+    container.innerHTML = '<div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i>加载中...</div>';
+
+    try {
+        const result = await api.resume.getAll();
+        if (result.success) {
+            renderResumeAdmin(result.sections);
+        } else {
+            container.innerHTML = '<div class="admin-empty"><i class="fas fa-exclamation-circle"></i>加载失败</div>';
+        }
+    } catch (e) {
+        container.innerHTML = '<div class="admin-empty"><i class="fas fa-exclamation-circle"></i>加载失败：' + e.message + '</div>';
+    }
+}
+
+function renderResumeAdmin(sections) {
+    const container = document.getElementById('adminResumeEditor');
+    if (!container) return;
+
+    let html = '';
+    for (const s of sections) {
+        html += `<div class="admin-section-card">
+            <div class="admin-section-card-header">
+                <span><i class="fas fa-folder"></i> <strong>${s.section}</strong></span>
+                <button class="admin-btn sm primary add-field-btn" data-section="${s.section}">
+                    <i class="fas fa-plus"></i> 添加字段
+                </button>
+            </div>`;
+        for (const f of s.fields) {
+            const isLong = f.field_type === 'longtext';
+            html += `<div class="resume-field-row" data-id="${f.id}" data-section="${f.section}">
+                <input class="admin-input resume-label" value="${escapeAdminHtml(f.field_label)}" placeholder="显示名">
+                <input class="admin-input resume-key" value="${escapeAdminHtml(f.field_key)}" placeholder="键名">
+                ${isLong
+                    ? `<textarea class="admin-input resume-value" rows="2">${escapeAdminHtml(f.field_value)}</textarea>`
+                    : `<input class="admin-input resume-value" value="${escapeAdminHtml(f.field_value)}" placeholder="值">`
+                }
+                <select class="admin-select resume-type">
+                    <option value="text" ${f.field_type === 'text' ? 'selected' : ''}>文本</option>
+                    <option value="longtext" ${f.field_type === 'longtext' ? 'selected' : ''}>长文本</option>
+                    <option value="list" ${f.field_type === 'list' ? 'selected' : ''}>列表</option>
+                </select>
+                <input class="admin-input resume-order" type="number" value="${f.sort_order}" style="width:55px;" min="0">
+                <button class="admin-btn sm danger del-field-btn" data-id="${f.id}"><i class="fas fa-trash"></i></button>
+            </div>`;
+        }
+        html += '</div>';
+    }
+
+    container.innerHTML = html;
+
+    // 绑定添加字段按钮
+    container.querySelectorAll('.add-field-btn').forEach(btn => {
+        btn.addEventListener('click', () => addResumeFieldRow(btn.dataset.section));
+    });
+
+    // 绑定删除字段按钮
+    container.querySelectorAll('.del-field-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteResumeField(parseInt(btn.dataset.id)));
+    });
+}
+
+function addResumeFieldRow(section) {
+    const container = document.getElementById('adminResumeEditor');
+    const sectionCard = [...container.querySelectorAll('.admin-section-card')]
+        .find(c => c.querySelector('.add-field-btn')?.dataset.section === section);
+    if (!sectionCard) return;
+
+    const row = document.createElement('div');
+    row.className = 'resume-field-row new-field';
+    row.dataset.section = section;
+    row.innerHTML = `
+        <input class="admin-input resume-label" placeholder="显示名">
+        <input class="admin-input resume-key" placeholder="键名">
+        <input class="admin-input resume-value" placeholder="值">
+        <select class="admin-select resume-type">
+            <option value="text">文本</option>
+            <option value="longtext">长文本</option>
+            <option value="list">列表</option>
+        </select>
+        <input class="admin-input resume-order" type="number" value="99" style="width:55px;" min="0">
+        <button class="admin-btn sm danger remove-row-btn"><i class="fas fa-times"></i></button>
+    `;
+    row.querySelector('.remove-row-btn').addEventListener('click', () => row.remove());
+    sectionCard.appendChild(row);
+}
+
+async function deleteResumeField(fieldId) {
+    if (!confirm('确定删除该字段？')) return;
+    const result = await api.resume.delete(fieldId);
+    if (result.success) {
+        showAuthNotification('字段已删除', 'success');
+        loadResumeAdmin();
+    } else {
+        showAuthNotification(result.message || '删除失败', 'error');
+    }
+}
+
+async function saveResumeFields() {
+    const statusEl = document.getElementById('resumeSaveStatus');
+    const rows = document.querySelectorAll('.resume-field-row');
+    const fields = [];
+
+    for (const row of rows) {
+        const label = row.querySelector('.resume-label')?.value.trim();
+        const key = row.querySelector('.resume-key')?.value.trim();
+        const value = row.querySelector('.resume-value')?.value;
+        const type = row.querySelector('.resume-type')?.value || 'text';
+        const order = parseInt(row.querySelector('.resume-order')?.value) || 0;
+        const section = row.dataset.section || '';
+
+        if (!key || !label || !section) continue;
+
+        fields.push({
+            section: section,
+            field_key: key,
+            field_label: label,
+            field_value: value || '',
+            field_type: type,
+            sort_order: order,
+        });
+    }
+
+    if (fields.length === 0) {
+        if (statusEl) { statusEl.textContent = '没有可保存的字段'; statusEl.style.color = '#ff9800'; }
+        return;
+    }
+
+    const result = await api.resume.update(fields);
+    if (result.success) {
+        if (statusEl) { statusEl.textContent = result.message; statusEl.style.color = '#4caf50'; }
+        setTimeout(() => loadResumeAdmin(), 500);
+    } else {
+        if (statusEl) { statusEl.textContent = result.message || '保存失败'; statusEl.style.color = '#e53935'; }
+    }
+}
+
+// ====== 经历管理 ======
+
+async function loadExperienceAdmin() {
+    const container = document.getElementById('adminExpList');
+    if (!container) return;
+    container.innerHTML = '<div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i>加载中...</div>';
+
+    try {
+        if (adminState.expSubTab === 'timeline') {
+            const result = await api.experience.list();
+            if (result.success) renderTimelineAdmin(result.events);
+            else container.innerHTML = '<div class="admin-empty">加载失败</div>';
+        } else {
+            const result = await api.experience.listProjects();
+            if (result.success) renderProjectsAdmin(result.projects);
+            else container.innerHTML = '<div class="admin-empty">加载失败</div>';
+        }
+    } catch (e) {
+        container.innerHTML = '<div class="admin-empty">加载失败：' + e.message + '</div>';
+    }
+}
+
+function renderTimelineAdmin(events) {
+    const container = document.getElementById('adminExpList');
+    if (!events || events.length === 0) {
+        container.innerHTML = '<div class="admin-empty"><i class="fas fa-clock"></i>暂无时间线事件</div>';
+        return;
+    }
+
+    const typeLabels = { work: '工作', education: '教育', life: '生活' };
+    container.innerHTML = events.map(e => `
+        <div class="admin-list-card">
+            <div class="admin-list-card-info">
+                <span class="admin-list-badge">${typeLabels[e.event_type] || e.event_type}</span>
+                <strong>${escapeAdminHtml(e.title)}</strong>
+                <span style="opacity:0.6;font-size:0.78rem;">${e.organization || ''} · ${e.start_date}-${e.end_date}</span>
+                <span style="font-size:0.7rem;opacity:0.4;">排序:${e.sort_order} ${e.is_visible ? '' : '[隐藏]'}</span>
+            </div>
+            <div class="admin-list-card-actions">
+                <button class="admin-btn sm" data-action="edit-event" data-id="${e.id}"><i class="fas fa-pen"></i></button>
+                <button class="admin-btn sm danger" data-action="del-event" data-id="${e.id}" data-title="${escapeAdminHtml(e.title)}"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+
+    bindExpListEvents();
+}
+
+function renderProjectsAdmin(projects) {
+    const container = document.getElementById('adminExpList');
+    if (!projects || projects.length === 0) {
+        container.innerHTML = '<div class="admin-empty"><i class="fas fa-project-diagram"></i>暂无项目经历</div>';
+        return;
+    }
+
+    container.innerHTML = projects.map(p => `
+        <div class="admin-list-card">
+            <div class="admin-list-card-info">
+                <strong>${escapeAdminHtml(p.title)}</strong>
+                <span style="opacity:0.6;font-size:0.78rem;">${p.period || ''} · ${p.role || ''}</span>
+                <span style="font-size:0.7rem;opacity:0.4;">排序:${p.sort_order} ${p.is_visible ? '' : '[隐藏]'}</span>
+            </div>
+            <div class="admin-list-card-actions">
+                <button class="admin-btn sm" data-action="edit-project" data-id="${p.id}"><i class="fas fa-pen"></i></button>
+                <button class="admin-btn sm danger" data-action="del-project" data-id="${p.id}" data-title="${escapeAdminHtml(p.title)}"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+
+    bindExpListEvents();
+}
+
+function bindExpListEvents() {
+    const container = document.getElementById('adminExpList');
+    container.querySelectorAll('[data-action="edit-event"]').forEach(btn => {
+        btn.addEventListener('click', () => openEventForm(parseInt(btn.dataset.id)));
+    });
+    container.querySelectorAll('[data-action="del-event"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = parseInt(btn.dataset.id);
+            const title = btn.dataset.title;
+            if (!confirm(`确定删除事件「${title}」？`)) return;
+            api.experience.delete(id).then(r => {
+                showAuthNotification(r.success ? '已删除' : (r.message || '失败'), r.success ? 'success' : 'error');
+                if (r.success) loadExperienceAdmin();
+            });
+        });
+    });
+    container.querySelectorAll('[data-action="edit-project"]').forEach(btn => {
+        btn.addEventListener('click', () => openProjectForm(parseInt(btn.dataset.id)));
+    });
+    container.querySelectorAll('[data-action="del-project"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = parseInt(btn.dataset.id);
+            const title = btn.dataset.title;
+            if (!confirm(`确定删除项目「${title}」？`)) return;
+            api.experience.deleteProject(id).then(r => {
+                showAuthNotification(r.success ? '已删除' : (r.message || '失败'), r.success ? 'success' : 'error');
+                if (r.success) loadExperienceAdmin();
+            });
+        });
+    });
+}
+
+async function openEventForm(eventId) {
+    let data = { event_type: 'work', title: '', organization: '', location: '', start_date: '', end_date: '',
+        summary: '', highlights: '', sort_order: 99, is_visible: true };
+
+    if (eventId) {
+        const result = await api.experience.list();
+        const event = (result.events || []).find(e => e.id === eventId);
+        if (event) {
+            data = {
+                event_type: event.event_type || 'work',
+                title: event.title || '',
+                organization: event.organization || '',
+                location: event.location || '',
+                start_date: event.start_date || '',
+                end_date: event.end_date || '',
+                summary: event.summary || '',
+                highlights: (event.highlights || []).join('\n'),
+                sort_order: event.sort_order ?? 99,
+                is_visible: event.is_visible !== false,
+            };
+        }
+    }
+
+    const formHtml = `
+        <div class="admin-form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="admin-form-group"><label>类型</label>
+                <select id="fEventType" class="admin-select">
+                    <option value="work" ${data.event_type === 'work' ? 'selected' : ''}>工作</option>
+                    <option value="education" ${data.event_type === 'education' ? 'selected' : ''}>教育</option>
+                    <option value="life" ${data.event_type === 'life' ? 'selected' : ''}>生活</option>
+                </select></div>
+            <div class="admin-form-group"><label>显示</label>
+                <select id="fEventVisible" class="admin-select">
+                    <option value="1" ${data.is_visible ? 'selected' : ''}>可见</option>
+                    <option value="0" ${!data.is_visible ? 'selected' : ''}>隐藏</option>
+                </select></div>
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>标题 *</label>
+                <input id="fEventTitle" class="admin-input" value="${escapeAdminHtml(data.title)}"></div>
+            <div class="admin-form-group"><label>组织/学校</label>
+                <input id="fEventOrg" class="admin-input" value="${escapeAdminHtml(data.organization)}"></div>
+            <div class="admin-form-group"><label>地点</label>
+                <input id="fEventLoc" class="admin-input" value="${escapeAdminHtml(data.location)}"></div>
+            <div class="admin-form-group"><label>开始日期</label>
+                <input id="fEventStart" class="admin-input" value="${escapeAdminHtml(data.start_date)}"></div>
+            <div class="admin-form-group"><label>结束日期</label>
+                <input id="fEventEnd" class="admin-input" value="${escapeAdminHtml(data.end_date)}"></div>
+            <div class="admin-form-group"><label>排序</label>
+                <input id="fEventOrder" class="admin-input" type="number" value="${data.sort_order}" min="0"></div>
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>摘要</label>
+                <textarea id="fEventSummary" class="admin-input" rows="2">${escapeAdminHtml(data.summary)}</textarea></div>
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>亮点（每行一条）</label>
+                <textarea id="fEventHighlights" class="admin-input" rows="3">${escapeAdminHtml(data.highlights)}</textarea></div>
+        </div>`;
+
+    openAdminForm(eventId ? '编辑时间线事件' : '添加时间线事件', formHtml, async () => {
+        const title = document.getElementById('fEventTitle')?.value.trim();
+        if (!title) { showAuthNotification('请输入标题', 'error'); return; }
+
+        const payload = {
+            event_type: document.getElementById('fEventType')?.value || 'work',
+            title: title,
+            organization: document.getElementById('fEventOrg')?.value.trim() || null,
+            location: document.getElementById('fEventLoc')?.value.trim() || null,
+            start_date: document.getElementById('fEventStart')?.value.trim() || null,
+            end_date: document.getElementById('fEventEnd')?.value.trim() || null,
+            summary: document.getElementById('fEventSummary')?.value.trim() || null,
+            highlights: (document.getElementById('fEventHighlights')?.value || '').split('\n').map(s => s.trim()).filter(Boolean),
+            sort_order: parseInt(document.getElementById('fEventOrder')?.value) || 99,
+            is_visible: document.getElementById('fEventVisible')?.value === '1',
+        };
+
+        const result = eventId
+            ? await api.experience.update(eventId, payload)
+            : await api.experience.create(payload);
+
+        if (result.success) {
+            closeAdminForm();
+            showAuthNotification(eventId ? '事件已更新' : '事件已创建', 'success');
+            loadExperienceAdmin();
+        } else {
+            showAuthNotification(result.message || '操作失败', 'error');
+        }
+    });
+}
+
+async function openProjectForm(projectId) {
+    let data = { title: '', period: '', role: '', tech_stack: '', description: '', highlights: '', sort_order: 99, is_visible: true };
+
+    if (projectId) {
+        const result = await api.experience.listProjects();
+        const proj = (result.projects || []).find(p => p.id === projectId);
+        if (proj) {
+            data = {
+                title: proj.title || '',
+                period: proj.period || '',
+                role: proj.role || '',
+                tech_stack: (proj.tech_stack || []).join(', '),
+                description: proj.description || '',
+                highlights: (proj.highlights || []).join('\n'),
+                sort_order: proj.sort_order ?? 99,
+                is_visible: proj.is_visible !== false,
+            };
+        }
+    }
+
+    const formHtml = `
+        <div class="admin-form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>项目名称 *</label>
+                <input id="fProjTitle" class="admin-input" value="${escapeAdminHtml(data.title)}"></div>
+            <div class="admin-form-group"><label>时间</label>
+                <input id="fProjPeriod" class="admin-input" value="${escapeAdminHtml(data.period)}" placeholder="如 2022.03 - 2023.01"></div>
+            <div class="admin-form-group"><label>角色</label>
+                <input id="fProjRole" class="admin-input" value="${escapeAdminHtml(data.role)}"></div>
+            <div class="admin-form-group"><label>排序</label>
+                <input id="fProjOrder" class="admin-input" type="number" value="${data.sort_order}" min="0"></div>
+            <div class="admin-form-group"><label>显示</label>
+                <select id="fProjVisible" class="admin-select">
+                    <option value="1" ${data.is_visible ? 'selected' : ''}>可见</option>
+                    <option value="0" ${!data.is_visible ? 'selected' : ''}>隐藏</option>
+                </select></div>
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>技术栈（逗号分隔）</label>
+                <input id="fProjTech" class="admin-input" value="${escapeAdminHtml(data.tech_stack)}"></div>
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>描述</label>
+                <textarea id="fProjDesc" class="admin-input" rows="2">${escapeAdminHtml(data.description)}</textarea></div>
+            <div class="admin-form-group" style="grid-column:1/-1;"><label>亮点（每行一条）</label>
+                <textarea id="fProjHighlights" class="admin-input" rows="3">${escapeAdminHtml(data.highlights)}</textarea></div>
+        </div>`;
+
+    openAdminForm(projectId ? '编辑项目经历' : '添加项目经历', formHtml, async () => {
+        const title = document.getElementById('fProjTitle')?.value.trim();
+        if (!title) { showAuthNotification('请输入项目名称', 'error'); return; }
+
+        const techStr = document.getElementById('fProjTech')?.value || '';
+        const payload = {
+            title: title,
+            period: document.getElementById('fProjPeriod')?.value.trim() || null,
+            role: document.getElementById('fProjRole')?.value.trim() || null,
+            tech_stack: techStr.split(',').map(s => s.trim()).filter(Boolean),
+            description: document.getElementById('fProjDesc')?.value.trim() || null,
+            highlights: (document.getElementById('fProjHighlights')?.value || '').split('\n').map(s => s.trim()).filter(Boolean),
+            sort_order: parseInt(document.getElementById('fProjOrder')?.value) || 99,
+            is_visible: document.getElementById('fProjVisible')?.value === '1',
+        };
+
+        const result = projectId
+            ? await api.experience.updateProject(projectId, payload)
+            : await api.experience.createProject(payload);
+
+        if (result.success) {
+            closeAdminForm();
+            showAuthNotification(projectId ? '项目已更新' : '项目已创建', 'success');
+            loadExperienceAdmin();
+        } else {
+            showAuthNotification(result.message || '操作失败', 'error');
+        }
+    });
+}
+
+// ====== 朋友圈管理 ======
+
+async function loadFriendsAdmin(page = 1) {
+    const container = document.getElementById('adminMomentsList');
+    if (!container) return;
+    if (page === 1) container.innerHTML = '<div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i>加载中...</div>';
+
+    try {
+        const result = await api.friends.listMoments(page, 10);
+        if (result.success) {
+            adminState.friendsPage = result.page;
+            adminState.friendsTotal = result.total;
+            adminState.friendsTotalPages = result.total_pages;
+            renderMomentsAdmin(result.moments, page === 1);
+        } else {
+            if (page === 1) container.innerHTML = '<div class="admin-empty">加载失败</div>';
+        }
+    } catch (e) {
+        if (page === 1) container.innerHTML = '<div class="admin-empty">加载失败：' + e.message + '</div>';
+    }
+}
+
+function renderMomentsAdmin(moments, clear) {
+    const container = document.getElementById('adminMomentsList');
+    if (clear) container.innerHTML = '';
+
+    if (!moments || moments.length === 0) {
+        if (clear) container.innerHTML = '<div class="admin-empty"><i class="fas fa-users"></i>暂无朋友圈动态</div>';
+        return;
+    }
+
+    for (const m of moments) {
+        const images = Array.isArray(m.images) ? m.images : [];
+        const div = document.createElement('div');
+        div.className = 'admin-list-card';
+        div.style.cssText = 'flex-direction:column;align-items:stretch;';
+        div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="admin-list-card-info" style="flex-direction:column;align-items:flex-start;gap:0.25rem;">
+                    <div><strong>${escapeAdminHtml(m.author_name)}</strong>
+                        <span style="font-size:0.7rem;opacity:0.5;"> · ${m.created_at ? new Date(m.created_at).toLocaleString('zh-CN') : ''}</span>
+                        <span style="font-size:0.7rem;opacity:0.4;"> · <i class="far fa-thumbs-up"></i>${m.likes} · <i class="far fa-comment"></i>${m.comments_count}</span>
+                    </div>
+                    <div style="font-size:0.82rem;opacity:0.8;">${escapeAdminHtml(m.content).substring(0, 120)}${m.content && m.content.length > 120 ? '...' : ''}</div>
+                    ${images.length ? `<div style="font-size:0.7rem;opacity:0.5;"><i class="fas fa-images"></i> ${images.length}张图片</div>` : ''}
+                </div>
+                <div class="admin-list-card-actions" style="flex-shrink:0;">
+                    <button class="admin-btn sm" data-action="edit-moment" data-id="${m.id}"><i class="fas fa-pen"></i></button>
+                    <button class="admin-btn sm danger" data-action="del-moment" data-id="${m.id}"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            <div class="admin-comments-section" id="admin-moment-comments-${m.id}" style="display:none;margin-top:0.4rem;border-top:1px solid rgba(74,144,226,0.08);padding-top:0.4rem;">
+            </div>
+            <button class="admin-btn sm" data-action="toggle-comments" data-id="${m.id}" style="align-self:flex-start;margin-top:0.3rem;">
+                <i class="fas fa-comments"></i> 查看评论
+            </button>
+        `;
+        container.appendChild(div);
+    }
+
+    // 绑定事件
+    container.querySelectorAll('[data-action="edit-moment"]').forEach(btn => {
+        btn.addEventListener('click', () => openMomentForm(parseInt(btn.dataset.id)));
+    });
+    container.querySelectorAll('[data-action="del-moment"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!confirm('确定删除该动态？')) return;
+            api.friends.deleteMoment(parseInt(btn.dataset.id)).then(r => {
+                showAuthNotification(r.success ? '已删除' : (r.message || '失败'), r.success ? 'success' : 'error');
+                if (r.success) loadFriendsAdmin();
+            });
+        });
+    });
+    container.querySelectorAll('[data-action="toggle-comments"]').forEach(btn => {
+        btn.addEventListener('click', () => toggleMomentComments(parseInt(btn.dataset.id)));
+    });
+
+    // 加载更多按钮
+    if (adminState.friendsPage < adminState.friendsTotalPages) {
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'admin-btn';
+        moreBtn.style.cssText = 'width:100%;margin-top:0.4rem;';
+        moreBtn.textContent = `加载更多 (${adminState.friendsPage}/${adminState.friendsTotalPages})`;
+        moreBtn.addEventListener('click', () => loadFriendsAdmin(adminState.friendsPage + 1));
+        container.appendChild(moreBtn);
+    }
+}
+
+async function toggleMomentComments(momentId) {
+    const section = document.getElementById(`admin-moment-comments-${momentId}`);
+    if (!section) return;
+
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        section.innerHTML = '<div style="font-size:0.75rem;opacity:0.5;">加载中...</div>';
+        try {
+            const result = await api.friends.getMoment(momentId);
+            const comments = result.comments || [];
+            if (comments.length === 0) {
+                section.innerHTML = '<div style="font-size:0.75rem;opacity:0.5;">暂无评论</div>';
+            } else {
+                section.innerHTML = comments.map(c => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;font-size:0.78rem;">
+                        <span><strong>${escapeAdminHtml(c.author_name)}</strong>：${escapeAdminHtml(c.content)}</span>
+                        <button class="admin-btn sm danger" data-action="del-comment" data-id="${c.id}"><i class="fas fa-times"></i></button>
+                    </div>
+                `).join('');
+                section.querySelectorAll('[data-action="del-comment"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (!confirm('确定删除该评论？')) return;
+                        api.friends.deleteComment(parseInt(btn.dataset.id)).then(r => {
+                            if (r.success) toggleMomentComments(momentId);
+                            showAuthNotification(r.success ? '已删除' : (r.message || '失败'), r.success ? 'success' : 'error');
+                        });
+                    });
+                });
+            }
+        } catch (e) {
+            section.innerHTML = '<div style="font-size:0.75rem;color:#e53935;">加载失败</div>';
+        }
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+async function openMomentForm(momentId) {
+    let data = { content: '', images: '' };
+
+    if (momentId) {
+        const result = await api.friends.getMoment(momentId);
+        data = {
+            content: result.content || '',
+            images: (result.images || []).join('\n'),
+        };
+    }
+
+    const formHtml = `
+        <div class="admin-form-grid" style="grid-template-columns:1fr;">
+            <div class="admin-form-group"><label>内容 *</label>
+                <textarea id="fMomentContent" class="admin-input" rows="4" maxlength="5000">${escapeAdminHtml(data.content)}</textarea></div>
+            <div class="admin-form-group"><label>图片URL（每行一个，最多9张）</label>
+                <textarea id="fMomentImages" class="admin-input" rows="3">${escapeAdminHtml(data.images)}</textarea></div>
+        </div>`;
+
+    openAdminForm(momentId ? '编辑朋友圈动态' : '发布朋友圈动态', formHtml, async () => {
+        const content = document.getElementById('fMomentContent')?.value.trim();
+        if (!content) { showAuthNotification('请输入内容', 'error'); return; }
+
+        const imgStr = document.getElementById('fMomentImages')?.value || '';
+        const images = imgStr.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 9);
+
+        const payload = { content, images };
+
+        let result;
+        if (momentId) {
+            result = await api.friends.updateMoment(momentId, payload);
+        } else {
+            result = await api.friends.createMoment(payload);
+        }
+
+        if (result.success) {
+            closeAdminForm();
+            showAuthNotification(momentId ? '动态已更新' : '动态已发布', 'success');
+            loadFriendsAdmin();
+        } else {
+            showAuthNotification(result.message || '操作失败', 'error');
+        }
+    });
+}
+
+// ====== 留言配置 (T5.4) ======
+
+async function loadMsgConfig() {
+    const container = document.getElementById('msgConfigDisplay');
+    if (!container) return;
+
+    try {
+        const result = await api.get('/admin/config');
+        if (result.messages) {
+            const adminNames = (result.messages.admin_names || []).join('、');
+            const sensitiveWords = result.messages.sensitive_words || [];
+            container.innerHTML = `
+                <div class="system-db-item"><span class="name"><i class="fas fa-user-shield"></i> 管理员名称</span>
+                    <span class="count" style="font-size:0.75rem;">${adminNames || '无'}</span></div>
+                <div class="system-db-item"><span class="name"><i class="fas fa-filter"></i> 敏感词列表</span>
+                    <span class="count" style="font-size:0.75rem;">${sensitiveWords.length > 0 ? sensitiveWords.join(', ') : '(空)'}</span></div>
+            `;
+        }
+    } catch (e) {
+        container.innerHTML = '<div class="admin-empty" style="font-size:0.75rem;">配置加载失败</div>';
+    }
 }
 
 window.initAdmin = initAdmin;

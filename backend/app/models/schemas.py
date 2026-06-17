@@ -192,6 +192,176 @@ class MessageResponse(BaseModel):
     created_at: str
 
 
+# ====== 简历 (Phase 2) ======
+
+class ResumeFieldCreate(BaseModel):
+    section: str = Field(..., min_length=1, max_length=50, description="分组: basic_info, bio, skills, work_experience, education, certifications, traits")
+    field_key: str = Field(..., min_length=1, max_length=100)
+    field_label: str = Field(..., min_length=1, max_length=100)
+    field_value: str
+    field_type: str = Field(default="text", pattern="^(text|longtext|list)$")
+    sort_order: int = 0
+
+
+class ResumeFieldUpdate(BaseModel):
+    field_value: str | None = None
+    field_label: str | None = None
+    sort_order: int | None = None
+
+
+class ResumeFieldResponse(BaseModel):
+    id: int
+    section: str
+    field_key: str
+    field_label: str
+    field_value: str
+    field_type: str
+    sort_order: int
+    created_at: str
+    updated_at: str | None
+
+
+class ResumeSectionResponse(BaseModel):
+    section: str
+    fields: list[ResumeFieldResponse]
+
+
+class ResumeBatchUpdateRequest(BaseModel):
+    """批量更新简历字段"""
+    fields: list[ResumeFieldCreate]
+
+
+# ====== 时间线/经历 (Phase 2) ======
+
+class TimelineEventCreate(BaseModel):
+    event_type: str = Field(default="work", pattern="^(work|education|life)$")
+    title: str = Field(..., min_length=1, max_length=200)
+    organization: str | None = None
+    location: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    summary: str | None = None
+    highlights: list[str] | None = None
+    sort_order: int = 0
+    is_visible: bool = True
+
+
+class TimelineEventUpdate(BaseModel):
+    event_type: str | None = None
+    title: str | None = None
+    organization: str | None = None
+    location: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    summary: str | None = None
+    highlights: list[str] | None = None
+    sort_order: int | None = None
+    is_visible: bool | None = None
+
+
+class TimelineEventResponse(BaseModel):
+    id: int
+    event_type: str
+    title: str
+    organization: str | None
+    location: str | None
+    start_date: str | None
+    end_date: str | None
+    summary: str | None
+    highlights: list[str] | None
+    sort_order: int
+    is_visible: bool
+    created_at: str
+    updated_at: str | None
+
+
+class ResumeProjectCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    period: str | None = None
+    role: str | None = None
+    tech_stack: list[str] | None = None
+    description: str | None = None
+    highlights: list[str] | None = None
+    post_id: int | None = None
+    sort_order: int = 0
+    is_visible: bool = True
+
+
+class ResumeProjectUpdate(BaseModel):
+    title: str | None = None
+    period: str | None = None
+    role: str | None = None
+    tech_stack: list[str] | None = None
+    description: str | None = None
+    highlights: list[str] | None = None
+    post_id: int | None = None
+    sort_order: int | None = None
+    is_visible: bool | None = None
+
+
+class ResumeProjectResponse(BaseModel):
+    id: int
+    title: str
+    period: str | None
+    role: str | None
+    tech_stack: list[str] | None
+    description: str | None
+    highlights: list[str] | None
+    post_id: int | None = None
+    sort_order: int
+    is_visible: bool
+    created_at: str
+    updated_at: str | None
+
+
+# ====== 朋友圈 (Phase 2) ======
+
+class MomentCreate(BaseModel):
+    content: str = Field(..., min_length=1, max_length=5000)
+    images: list[str] | None = Field(default=None, max_items=9, description="图片路径列表，最多9张")
+
+
+class MomentUpdate(BaseModel):
+    content: str | None = None
+    images: list[str] | None = None
+    is_published: bool | None = None
+
+
+class MomentResponse(BaseModel):
+    id: int
+    author_name: str
+    content: str
+    images: list[str] | None
+    likes: int
+    is_published: bool
+    created_at: str
+    comments_count: int = 0
+
+
+class MomentDetailResponse(BaseModel):
+    id: int
+    author_name: str
+    content: str
+    images: list[str] | None
+    likes: int
+    is_published: bool
+    created_at: str
+    comments: list[dict[str, Any]]
+
+
+class FriendsCommentCreate(BaseModel):
+    author_name: str = Field(..., min_length=1, max_length=50)
+    content: str = Field(..., min_length=1, max_length=2000)
+
+
+class FriendsCommentResponse(BaseModel):
+    id: int
+    moment_id: int
+    author_name: str
+    content: str
+    created_at: str
+
+
 # ====== 通用 ======
 
 class ApiResponse(BaseModel):

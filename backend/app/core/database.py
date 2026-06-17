@@ -169,6 +169,7 @@ CREATE TABLE IF NOT EXISTS messages (
     content TEXT NOT NULL,
     likes INTEGER DEFAULT 0,
     is_read INTEGER DEFAULT 0,
+    is_admin INTEGER DEFAULT 0,
     parent_id INTEGER,
     reply_to_name TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -183,6 +184,76 @@ CREATE TABLE IF NOT EXISTS public_pages (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ====== Phase 1 新增表 ======
+
+-- 简历数据表（EAV 模式：存储简历的结构化字段）
+CREATE TABLE IF NOT EXISTS resume_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    section TEXT NOT NULL,          -- 分组: basic_info, bio, skills, work_experience, education, certifications, traits
+    field_key TEXT NOT NULL,        -- 字段键: name, gender, age, degree, summary, skill_frontend 等
+    field_label TEXT NOT NULL,      -- 字段显示标签: "姓名", "性别", "年龄" 等
+    field_value TEXT NOT NULL,      -- 字段值
+    field_type TEXT DEFAULT 'text', -- 类型: text, longtext, list
+    sort_order INTEGER DEFAULT 0,   -- 同section内排序
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(section, field_key)
+);
+
+-- 时间线事件表（经历页 + 简历工作经历共用）
+CREATE TABLE IF NOT EXISTS timeline_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type TEXT NOT NULL DEFAULT 'work',  -- work, education, life
+    title TEXT NOT NULL,                      -- 事件标题: "高级前端开发工程师"
+    organization TEXT,                        -- 组织/公司/学校: "科技先锋公司"
+    location TEXT,                            -- 地点: "北京"
+    start_date TEXT,                          -- 开始日期: "2020"
+    end_date TEXT,                            -- 结束日期: "至今" 或 ""
+    summary TEXT,                             -- 摘要描述
+    highlights TEXT,                          -- JSON数组: ["成就1","成就2"]
+    sort_order INTEGER DEFAULT 0,
+    is_visible INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 项目经历表（简历页用）
+CREATE TABLE IF NOT EXISTS resume_projects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,                     -- 项目名称
+    period TEXT,                             -- 时间范围: "2022.03 - 2023.01"
+    role TEXT,                               -- 角色: "项目负责人 / 前端架构师"
+    tech_stack TEXT,                         -- JSON数组: ["React","TypeScript","Vite"]
+    description TEXT,                        -- 项目描述
+    highlights TEXT,                         -- JSON数组: 关键成果列表
+    post_id INTEGER,                         -- 关联博客文章ID (可空)
+    sort_order INTEGER DEFAULT 0,
+    is_visible INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 朋友圈动态表
+CREATE TABLE IF NOT EXISTS friends_moments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    author_name TEXT NOT NULL DEFAULT '黑色小猫',
+    content TEXT NOT NULL,                   -- 文字内容
+    images TEXT,                             -- JSON数组: ["/uploads/moment_xxx.jpg", ...]
+    likes INTEGER DEFAULT 0,
+    is_published INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 朋友圈评论表
+CREATE TABLE IF NOT EXISTS friends_comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    moment_id INTEGER NOT NULL,
+    author_name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (moment_id) REFERENCES friends_moments(id) ON DELETE CASCADE
+);
+
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(is_published, published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category_id);
@@ -193,4 +264,11 @@ CREATE INDEX IF NOT EXISTS idx_users_access_code ON users(access_code);
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_parent ON messages(parent_id);
 CREATE INDEX IF NOT EXISTS idx_public_pages_page ON public_pages(page_id);
+-- Phase 1 新增索引
+CREATE INDEX IF NOT EXISTS idx_resume_data_section ON resume_data(section, sort_order);
+CREATE INDEX IF NOT EXISTS idx_timeline_events_type ON timeline_events(event_type, sort_order);
+CREATE INDEX IF NOT EXISTS idx_timeline_events_visible ON timeline_events(is_visible);
+CREATE INDEX IF NOT EXISTS idx_resume_projects_visible ON resume_projects(is_visible, sort_order);
+CREATE INDEX IF NOT EXISTS idx_friends_moments_pub ON friends_moments(is_published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_friends_comments_moment ON friends_comments(moment_id);
 """

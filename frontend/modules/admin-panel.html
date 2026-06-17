@@ -25,6 +25,15 @@
             <button class="admin-tab" data-tab="public-pages">
                 <i class="fas fa-globe-asia"></i> 公开页面
             </button>
+            <button class="admin-tab" data-tab="resume-admin">
+                <i class="fas fa-file-alt"></i> 简历管理
+            </button>
+            <button class="admin-tab" data-tab="experience-admin">
+                <i class="fas fa-pencil-alt"></i> 经历管理
+            </button>
+            <button class="admin-tab" data-tab="friends-admin">
+                <i class="fas fa-users"></i> 朋友圈管理
+            </button>
         </div>
 
         <!-- 系统状态（默认激活） -->
@@ -113,6 +122,13 @@
             </div>
             <div id="adminMessagesList"></div>
             <div class="admin-pagination" id="messagesPagination"></div>
+            <div class="admin-section-header" style="margin-top:0.8rem;">
+                <i class="fas fa-shield-alt"></i>
+                <span class="admin-section-title">留言配置</span>
+            </div>
+            <div class="admin-config-display" id="msgConfigDisplay">
+                <div class="admin-empty">点击「留言管理」标签加载配置</div>
+            </div>
         </div>
 
         <!-- 公开页面 -->
@@ -129,10 +145,61 @@
                 </button>
             </div>
         </div>
+        <!-- 简历管理 -->
+        <div class="admin-tab-content" id="tab-resume-admin">
+            <div class="admin-toolbar">
+                <button class="admin-btn primary" id="saveResumeBtn">
+                    <i class="fas fa-save"></i> 保存全部修改
+                </button>
+                <span class="admin-hint-inline" id="resumeSaveStatus"></span>
+            </div>
+            <div class="admin-resume-editor" id="adminResumeEditor">
+                <div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i>加载中...</div>
+            </div>
+        </div>
+
+        <!-- 经历管理 -->
+        <div class="admin-tab-content" id="tab-experience-admin">
+            <div class="admin-sub-tabs" id="expSubTabs">
+                <button class="admin-sub-tab active" data-sub="timeline">时间线事件</button>
+                <button class="admin-sub-tab" data-sub="projects">项目经历</button>
+            </div>
+            <div class="admin-toolbar">
+                <button class="admin-btn primary" id="addExpItemBtn">
+                    <i class="fas fa-plus"></i> <span id="addExpItemLabel">添加事件</span>
+                </button>
+            </div>
+            <div class="admin-list-container" id="adminExpList">
+                <div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i>加载中...</div>
+            </div>
+        </div>
+
+        <!-- 朋友圈管理 -->
+        <div class="admin-tab-content" id="tab-friends-admin">
+            <div class="admin-toolbar">
+                <button class="admin-btn primary" id="addMomentBtn">
+                    <i class="fas fa-plus"></i> 发布新动态
+                </button>
+            </div>
+            <div class="admin-list-container" id="adminMomentsList">
+                <div class="admin-empty"><i class="fas fa-spinner fa-pulse"></i>加载中...</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- 添加/编辑用户弹窗 -->
+<!-- 通用管理表单弹窗 -->
+<div class="admin-modal" id="adminFormModal" style="display:none;">
+    <div class="admin-overlay" id="adminFormOverlay"></div>
+    <div class="admin-modal-card" id="adminFormCard">
+        <h4 id="adminFormTitle"><i class="fas fa-edit"></i> 表单</h4>
+        <div id="adminFormBody"></div>
+        <div class="admin-modal-actions">
+            <button class="admin-btn" id="cancelAdminForm">取消</button>
+            <button class="admin-btn primary" id="confirmAdminForm">确认</button>
+        </div>
+    </div>
+</div>
 <div class="admin-modal" id="userFormModal" style="display:none;">
     <div class="admin-overlay" id="userFormOverlay"></div>
     <div class="admin-modal-card">

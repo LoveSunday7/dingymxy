@@ -8,7 +8,7 @@ const DEPLOY_CONFIG = {
         apiBaseUrl: 'https://your-domain.com/api',
     },
     development: {
-        apiBaseUrl: 'http://172.18.217.177:8000/api',
+        apiBaseUrl: 'http://localhost:8000/api',
     },
     // 当前环境
     current: 'development',

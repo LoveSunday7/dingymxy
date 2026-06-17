@@ -1,7 +1,7 @@
 // 前端配置文件 - 可根据部署环境修改
 const APP_CONFIG = {
     // 后端API地址
-    apiBaseUrl: 'http://172.18.217.177:8000/api',
+    apiBaseUrl: 'http://localhost:8000/api',
     // 站点信息
     site: {
         name: '黑色小猫咪的GitHub小窝',
@@ -189,6 +189,43 @@ const api = {
         stats() {
             return api.get('/users/stats');
         },
+    },
+
+    // ====== 简历 ======
+    resume: {
+        getAll: () => api.get('/resume'),
+        getSection: (section) => api.get(`/resume/${section}`),
+        update: (fields) => api.put('/resume', { fields }),
+        delete: (id) => api.delete(`/resume/${id}`),
+    },
+
+    // ====== 经历 ======
+    experience: {
+        list: (eventType) => {
+            const params = {};
+            if (eventType) params.event_type = eventType;
+            return api.get('/experience', params);
+        },
+        create: (data) => api.post('/experience', data),
+        update: (id, data) => api.put(`/experience/${id}`, data),
+        delete: (id) => api.delete(`/experience/${id}`),
+        updateSort: (items) => api.put('/experience/sort/update', items),
+        listProjects: () => api.get('/experience/projects/list'),
+        createProject: (data) => api.post('/experience/projects', data),
+        updateProject: (id, data) => api.put(`/experience/projects/${id}`, data),
+        deleteProject: (id) => api.delete(`/experience/projects/${id}`),
+    },
+
+    // ====== 朋友圈 ======
+    friends: {
+        listMoments: (page = 1, perPage = 10) => api.get('/friends/moments', { page, per_page: perPage }),
+        getMoment: (id) => api.get(`/friends/moments/${id}`),
+        createMoment: (data) => api.post('/friends/moments', data),
+        updateMoment: (id, data) => api.put(`/friends/moments/${id}`, data),
+        deleteMoment: (id) => api.delete(`/friends/moments/${id}`),
+        likeMoment: (id) => api.post(`/friends/moments/${id}/like`),
+        createComment: (momentId, data) => api.post(`/friends/moments/${momentId}/comments`, data),
+        deleteComment: (id) => api.delete(`/friends/comments/${id}`),
     },
 
     // 文件上传方法（FormData）
